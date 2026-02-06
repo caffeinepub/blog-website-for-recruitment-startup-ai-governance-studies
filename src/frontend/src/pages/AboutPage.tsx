@@ -1,5 +1,6 @@
 import { Mail, Linkedin, Github } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { PUBLIC_CONTACT } from '../config/publicContact';
 
 export default function AboutPage() {
   return (
@@ -80,17 +81,31 @@ export default function AboutPage() {
             Interested in our research or recruitment solutions? We'd love to hear from you.
           </p>
           <div className="flex flex-wrap gap-4">
-            <Button variant="outline" size="sm">
-              <Mail className="mr-2 h-4 w-4" />
-              Email Us
+            <Button variant="outline" size="sm" asChild>
+              <a href={`mailto:${PUBLIC_CONTACT.email}`}>
+                <Mail className="mr-2 h-4 w-4" />
+                Email Us
+              </a>
             </Button>
-            <Button variant="outline" size="sm">
-              <Linkedin className="mr-2 h-4 w-4" />
-              LinkedIn
+            <Button variant="outline" size="sm" asChild>
+              <a
+                href={PUBLIC_CONTACT.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Linkedin className="mr-2 h-4 w-4" />
+                LinkedIn
+              </a>
             </Button>
-            <Button variant="outline" size="sm">
-              <Github className="mr-2 h-4 w-4" />
-              GitHub
+            <Button variant="outline" size="sm" asChild>
+              <a
+                href={PUBLIC_CONTACT.github}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="mr-2 h-4 w-4" />
+                GitHub
+              </a>
             </Button>
           </div>
         </section>

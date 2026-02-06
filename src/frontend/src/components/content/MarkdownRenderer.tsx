@@ -5,7 +5,15 @@ interface MarkdownRendererProps {
 }
 
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
+  // Safe content handling - coerce to string and handle empty/invalid inputs
+  const safeContent = typeof content === 'string' ? content : '';
+
   const parseMarkdown = (text: string) => {
+    if (!text) {
+      return [];
+    }
+
+    const lines = text.split('\n');
     const elements: React.ReactElement[] = [];
     let currentParagraph: string[] = [];
     let inCodeBlock = false;
@@ -83,6 +91,24 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
       if (!trimmed) {
         flushParagraph();
         flushList();
+        continue;
+      }
+
+      // Image syntax: ![alt](url)
+      const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+      if (imageMatch) {
+        flushParagraph();
+        flushList();
+        const altText = imageMatch[1];
+        const imageUrl = imageMatch[2];
+        elements.push(
+          <img
+            key={key++}
+            src={imageUrl}
+            alt={altText}
+            className="w-full max-w-full h-auto rounded-lg my-6"
+          />
+        );
         continue;
       }
 
@@ -248,6 +274,5 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     return parts;
   };
 
-  const lines = content.split('\n');
-  return <div className="markdown-content">{parseMarkdown(content)}</div>;
+  return <div className="markdown-content">{parseMarkdown(safeContent)}</div>;
 }

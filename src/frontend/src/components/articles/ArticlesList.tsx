@@ -8,12 +8,31 @@ interface ArticlesListProps {
   articles: Article[];
 }
 
+function cleanMarkdownForExcerpt(content: string): string {
+  let cleaned = content;
+  
+  // Remove image syntax: ![alt](url)
+  cleaned = cleaned.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '');
+  
+  // Remove link URLs but keep link text: [text](url) -> text
+  cleaned = cleaned.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+  
+  // Remove other markdown syntax
+  cleaned = cleaned.replace(/[#*`]/g, '');
+  
+  // Collapse multiple whitespace/newlines into single space
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  
+  return cleaned;
+}
+
 export default function ArticlesList({ articles }: ArticlesListProps) {
   return (
     <div className="space-y-6">
       {articles.map((article) => {
         const publishDate = new Date(Number(article.timestamp) / 1000000);
-        const excerpt = article.content.slice(0, 200).replace(/[#*`]/g, '') + '...';
+        const cleanedContent = cleanMarkdownForExcerpt(article.content);
+        const excerpt = cleanedContent.slice(0, 200) + (cleanedContent.length > 200 ? '...' : '');
 
         return (
           <Link

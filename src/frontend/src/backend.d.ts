@@ -35,11 +35,15 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createArticle(slug: string, update: ArticleUpdate): Promise<void>;
     deleteArticle(id: bigint): Promise<void>;
+    getAllSlugsAdmin(): Promise<Array<string>>;
+    getArticleById(id: bigint): Promise<Article>;
     getArticleBySlug(slug: string): Promise<Article>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
+    getPublicArticleBySlug(slug: string): Promise<Article | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    listAllArticlesAdmin(): Promise<Array<Article>>;
     listPublishedArticles(): Promise<Array<Article>>;
     publishArticle(id: bigint, published: boolean): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;

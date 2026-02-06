@@ -1,45 +1,28 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useListPublishedArticles } from '../hooks/useQueries';
-import ArticlesList from '../components/articles/ArticlesList';
-import TagFilterBar from '../components/articles/TagFilterBar';
 import { Input } from '@/components/ui/input';
 import { Search, Loader2 } from 'lucide-react';
+import ArticlesList from '../components/articles/ArticlesList';
+import TagFilterBar from '../components/articles/TagFilterBar';
 
 export default function ArticlesIndexPage() {
-  const { data: articles = [], isLoading } = useListPublishedArticles();
+  const { data: articles = [], isLoading, error, isFetched } = useListPublishedArticles();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  // Extract all unique tags
-  const allTags = useMemo(() => {
-    const tagSet = new Set<string>();
-    articles.forEach((article) => {
-      article.tags.forEach((tag) => tagSet.add(tag));
-    });
-    return Array.from(tagSet).sort();
-  }, [articles]);
+  const allTags = Array.from(new Set(articles.flatMap((article) => article.tags)));
 
-  // Filter articles based on search and tag
-  const filteredArticles = useMemo(() => {
-    let filtered = articles;
+  const filteredArticles = articles.filter((article) => {
+    const matchesSearch =
+      searchQuery === '' ||
+      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    // Filter by search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (article) =>
-          article.title.toLowerCase().includes(query) ||
-          article.content.toLowerCase().includes(query)
-      );
-    }
+    const matchesTag = !selectedTag || article.tags.includes(selectedTag);
 
-    // Filter by selected tag
-    if (selectedTag) {
-      filtered = filtered.filter((article) => article.tags.includes(selectedTag));
-    }
-
-    return filtered;
-  }, [articles, searchQuery, selectedTag]);
+    return matchesSearch && matchesTag;
+  });
 
   if (isLoading) {
     return (
@@ -54,20 +37,33 @@ export default function ArticlesIndexPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex items-center justify-center min-h-[40vh]">
+          <div className="text-center space-y-4">
+            <p className="text-destructive font-medium">Error loading articles</p>
+            <p className="text-sm text-muted-foreground">{error.message}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="space-y-8">
         {/* Header */}
         <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">Articles</h1>
-          <p className="text-lg text-muted-foreground">
-            Insights on AI governance, constraint geometry, and recruitment innovation.
+          <h1 className="text-4xl font-bold tracking-tight">Articles</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl">
+            Insights on recruitment, attrition, and AI-powered talent intelligence.
           </p>
         </div>
 
         {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <div className="relative max-w-xl">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search articles..."
@@ -87,10 +83,14 @@ export default function ArticlesIndexPage() {
         )}
 
         {/* Articles List */}
-        {filteredArticles.length === 0 ? (
-          <div className="text-center py-12">
+        {isFetched && filteredArticles.length === 0 && articles.length === 0 ? (
+          <div className="text-center py-12 border border-dashed border-border rounded-lg">
+            <p className="text-muted-foreground">No articles published yet. Check back soon!</p>
+          </div>
+        ) : filteredArticles.length === 0 ? (
+          <div className="text-center py-12 border border-dashed border-border rounded-lg">
             <p className="text-muted-foreground">
-              {searchQuery || selectedTag ? 'No articles found matching your criteria.' : 'No articles published yet.'}
+              No articles match your search. Try different keywords or clear filters.
             </p>
           </div>
         ) : (

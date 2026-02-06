@@ -1,247 +1,49 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Recruitment + AI Governance Blog (Public + Admin Markdown CMS)",
+  "title": "Add new admin article template and ensure public visibility after publish",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Build public site pages (Home, Articles index, Article detail, About) with navigation for a recruitment startup + AI governance research blog.",
+      "id": "REQ-55",
+      "summary": "Add a new long-form English ArticleTemplate entry so it appears in the Admin Article Editor “Start from a Template” dropdown and loads into the editor correctly.",
       "acceptanceCriteria": [
-        "Navigating to the app shows a homepage with clear entry points to Articles and About.",
-        "Articles index page lists published posts with title, date, short excerpt, and tags/labels (if present).",
-        "Clicking an article from the index opens an article detail page with full content and metadata.",
-        "About page exists and contains placeholder sections for the startup and the AI governance/constraint geometry focus."
+        "`frontend/src/content/articleTemplates.ts` includes one new `ArticleTemplate` with a unique `slug`, `title`, `tags`, and non-empty Markdown `content`.",
+        "The Admin Article Editor page template selector lists the new template and successfully loads its title/slug/content/author/tags into the editor when selected.",
+        "All user-facing text inside the new article content is written in English.",
+        "The new template slug does not conflict with any existing template slugs and remains URL-safe (lowercase, hyphenated)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
-          "operation": "create",
-          "description": "Create the app shell with client-side routing and route wiring for Home, Articles, Article Detail (by slug), About, and Admin pages; ensure public routes are accessible without authentication."
-        },
+          "path": "frontend/src/content/articleTemplates.ts",
+          "operation": "modify",
+          "description": "Add one new `ArticleTemplate` with a unique, URL-safe lowercase-hyphenated `slug`, English `title`, `author`, `tags`, and substantial non-empty Markdown `content`. If including a Markdown image, reference an existing static asset path already used by other templates (e.g., an existing file under frontend/public/assets/generated)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-56",
+      "summary": "Ensure an article created from the new template can be saved, published, and then appears for anonymous visitors on /articles and /articles/$slug with correct Markdown rendering (including images).",
+      "acceptanceCriteria": [
+        "Admin can: load the new template, click “Save” to create the article, then toggle publish to “Published” without errors.",
+        "As an anonymous (logged-out) visitor, `/articles` lists the newly published article in the results.",
+        "As an anonymous (logged-out) visitor, navigating to `/articles/<new-template-slug>` renders the article title and Markdown content without runtime errors.",
+        "If the new article includes Markdown images, they render correctly using the existing Markdown image support (no broken layout)."
+      ],
+      "file_operations": [
         {
-          "path": "frontend/src/components/layout/SiteLayout.tsx",
-          "operation": "create",
-          "description": "Create a shared layout (header/nav/footer, content width, consistent typography wrappers) used across all pages; include links to Home, Articles, About, and Admin. Use shadcn-ui composed components for header controls (e.g., buttons, dropdowns) as needed; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "create",
-          "description": "Create the homepage content presenting the recruitment startup + AI governance/constraint geometry positioning with prominent calls-to-action to Articles and About; wire hero banner asset via static reference to frontend/public/assets/generated/hero-constraint-geometry.dim_1600x600.png."
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Tighten client-side cache invalidation after publish/unpublish so newly published content reliably appears on the public Articles index and any open article detail view (e.g., ensure relevant public article queries are invalidated/refetched after publish). Keep all user-facing text in English."
         },
         {
           "path": "frontend/src/pages/ArticlesIndexPage.tsx",
-          "operation": "create",
-          "description": "Create the public articles index page that fetches and renders published articles from the backend interface, showing title, date, excerpt/summary, and tags."
-        },
-        {
-          "path": "frontend/src/pages/ArticleDetailPage.tsx",
-          "operation": "create",
-          "description": "Create the public article detail page that loads an article by slug and displays metadata plus full content rendered from Markdown."
-        },
-        {
-          "path": "frontend/src/pages/AboutPage.tsx",
-          "operation": "create",
-          "description": "Create About page with placeholder sections for the startup background and the AI governance/constraint geometry research focus (English UI text)."
-        },
-        {
-          "path": "frontend/src/components/content/MarkdownRenderer.tsx",
-          "operation": "create",
-          "description": "Add a reusable Markdown rendering component for long-form reading on article detail and editor preview (e.g., react-markdown + GFM)."
-        },
-        {
-          "path": "frontend/package.json",
           "operation": "modify",
-          "description": "Add/verify frontend dependencies for routing and Markdown rendering (e.g., react-router-dom, react-markdown, remark-gfm) required by the public pages and article detail rendering."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Add Internet Identity-based admin-only access to content management flows so only the owner/admin can create/edit/publish/unpublish/delete articles.",
-      "acceptanceCriteria": [
-        "Unauthenticated users cannot access admin/editor screens or call write endpoints successfully.",
-        "Authenticated admin can create a draft article, edit it, publish it, unpublish it, and delete it.",
-        "Published articles are visible on public pages; drafts/unpublished articles are not visible publicly."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/auth/LoginButton.tsx",
-          "operation": "create",
-          "description": "Implement a login/logout button using the selected authorization component’s Internet Identity flow; on logout, clear cached application data via React Query cache clearing. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/AdminRouteGuard.tsx",
-          "operation": "create",
-          "description": "Create an admin-only route guard wrapper that checks authentication state (Internet Identity) and authorization (backend isCallerAdmin / getCallerUserRole), redirecting or showing an access-denied screen for non-admins. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/AccessDeniedScreen.tsx",
-          "operation": "create",
-          "description": "Create an access denied screen for unauthorized users attempting to access admin/editor screens (admin-only UI). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/auth/ProfileSetupModal.tsx",
-          "operation": "create",
-          "description": "Create a first-login profile setup modal (collect a display name) that uses getCallerUserProfile/saveCallerUserProfile and avoids UI flashing per the authorization component guidance; show only for authenticated admin area usage. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useCurrentUser.ts",
-          "operation": "create",
-          "description": "Add React Query hooks for isCallerAdmin/getCallerUserRole/getCallerUserProfile and a helper for triggering the profile setup modal state; handle authorization traps gracefully in UI. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useArticles.ts",
-          "operation": "create",
-          "description": "Add React Query hooks/mutations for article write operations (create/update/delete/publish) and read operations used by both public and admin UIs; ensure write operations are invoked only from admin-guarded screens and display backend authorization errors in a friendly way."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Wire login UI into the header and wrap admin routes with AdminRouteGuard; ensure public pages remain accessible without login."
-        }
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "summary": "Create an admin dashboard and Markdown article editor with metadata editing, preview, and slug validation before saving/publishing.",
-      "acceptanceCriteria": [
-        "Admin dashboard lists all articles with status (draft/published), updated time, and quick actions (edit, publish/unpublish, delete).",
-        "Editor supports Markdown input and a preview mode.",
-        "Slug is validated for uniqueness and URL-safety before publishing/saving (with a clear error message on conflict)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "operation": "create",
-          "description": "Create the admin dashboard page listing articles with status, timestamps, and actions (edit, publish/unpublish, delete), using composed shadcn-ui table/list primitives and dialogs for destructive actions; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/pages/admin/ArticleEditorPage.tsx",
-          "operation": "create",
-          "description": "Create the admin article editor page with fields for title, slug, summary/excerpt, tags, publish status, and Markdown content with live preview; use composed shadcn-ui inputs/tabs/badges/buttons for UI; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/SlugField.tsx",
-          "operation": "create",
-          "description": "Add a slug input helper that enforces URL-safe formatting client-side and performs uniqueness checks via backend lookup (show clear error on conflict) before save/publish."
-        },
-        {
-          "path": "frontend/src/components/admin/TagEditor.tsx",
-          "operation": "create",
-          "description": "Create a tags input/editor component (add/remove tags) for the article metadata; use composed shadcn-ui badges/inputs as needed; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/admin/PublishToggle.tsx",
-          "operation": "create",
-          "description": "Create a publish/unpublish control that triggers the publish mutation and reflects current status; use composed shadcn-ui switch/button patterns; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/backend.d.ts",
-          "operation": "modify",
-          "description": "Update frontend backend type definitions to include any admin listing/fetch capabilities required by the dashboard/editor (e.g., listing all articles including drafts, fetching by id) so the UI can be implemented cleanly and remain type-safe once the backend capability is added."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Register and wire admin routes (e.g., /admin and /admin/articles/:id or :slug) and ensure they are reachable from the header/nav only when appropriate."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Add client-side search, tag filtering, and pagination/incremental loading to the public articles index.",
-      "acceptanceCriteria": [
-        "User can type into a search field and see the list filter by matching title/summary.",
-        "User can click a tag filter and see only articles with that tag.",
-        "If pagination/incremental loading is used, the UI clearly indicates more results and loads the next set correctly."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/ArticlesIndexPage.tsx",
-          "operation": "modify",
-          "description": "Add a search input (title/summary matching), a tag filter UI (derived from loaded articles), and pagination or incremental loading (e.g., 'Load more') implemented client-side over the published articles list; use composed shadcn-ui input/button/badge components as appropriate; verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/articles/ArticlesList.tsx",
-          "operation": "create",
-          "description": "Extract a reusable articles list component that renders cards/rows with title, date, excerpt, and tags, and supports the filtered/paginated view model."
-        },
-        {
-          "path": "frontend/src/components/articles/TagFilterBar.tsx",
-          "operation": "create",
-          "description": "Create a tag filter bar component for selecting/clearing a tag filter; use composed shadcn-ui badges/buttons for consistent styling; verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "summary": "Apply a consistent research/editorial visual theme across the site with earth-tone accents (no blue/purple primary) and optimized long-form typography.",
-      "acceptanceCriteria": [
-        "All pages share consistent layout primitives (header, content width, headings, article typography).",
-        "Primary accents are not blue/purple; the palette is applied consistently to buttons/links/highlights.",
-        "Article detail typography is optimized for long-form reading (line length, headings, code/quotes if present)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "create",
-          "description": "Define global CSS variables/theme tokens and base typography for an editorial/research look (earth-tone primary/accent colors, consistent spacing, readable fonts), ensuring primary accents are not blue/purple; include improved long-form article styles (e.g., Tailwind typography/prose tuning)."
-        },
-        {
-          "path": "frontend/tailwind.config.js",
-          "operation": "modify",
-          "description": "Adjust Tailwind theme extensions/tokens if needed to support the chosen earth-tone palette and consistent typography utilities used across pages (while keeping existing shadcn token approach)."
-        },
-        {
-          "path": "frontend/src/components/layout/SiteLayout.tsx",
-          "operation": "modify",
-          "description": "Ensure header/nav/footer and content container sizing are consistent across pages and that link/button accents follow the non-blue/non-purple palette; use composed shadcn-ui components where applicable; verify the component's usage instructions before implementing."
+          "description": "Verify the public Articles index continues to handle logged-out (anonymous) visitors cleanly and refreshes to include newly published articles after an admin publishes (no new routes/pages). Keep all user-facing UI text in English."
         },
         {
           "path": "frontend/src/pages/ArticleDetailPage.tsx",
           "operation": "modify",
-          "description": "Apply long-form reading optimizations (max line width, spacing, headings, blockquotes/code styling via prose) so article content is comfortable to read."
-        }
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "summary": "Include required generated brand images as static frontend assets and wire them into the header, favicon, and homepage hero.",
-      "acceptanceCriteria": [
-        "All generated images are present in frontend/public/assets/generated with the exact filenames requested.",
-        "Header/site chrome uses the generated logo and favicon is set.",
-        "Homepage uses the generated hero banner."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/public/assets/generated/startup-logo.dim_512x512.png",
-          "operation": "create",
-          "description": "Add the generated logo image asset at the exact required path and filename: frontend/public/assets/generated/startup-logo.dim_512x512.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/hero-constraint-geometry.dim_1600x600.png",
-          "operation": "create",
-          "description": "Add the generated hero banner asset at the exact required path and filename: frontend/public/assets/generated/hero-constraint-geometry.dim_1600x600.png."
-        },
-        {
-          "path": "frontend/public/assets/generated/favicon-constraint.dim_64x64.png",
-          "operation": "create",
-          "description": "Add the generated favicon asset at the exact required path and filename: frontend/public/assets/generated/favicon-constraint.dim_64x64.png."
-        },
-        {
-          "path": "frontend/index.html",
-          "operation": "modify",
-          "description": "Set the favicon to use the generated asset frontend/public/assets/generated/favicon-constraint.dim_64x64.png and ensure document metadata remains in English."
-        },
-        {
-          "path": "frontend/src/components/layout/SiteLayout.tsx",
-          "operation": "modify",
-          "description": "Wire the generated logo into the header/site chrome using a static reference to frontend/public/assets/generated/startup-logo.dim_512x512.png."
-        },
-        {
-          "path": "frontend/src/pages/HomePage.tsx",
-          "operation": "modify",
-          "description": "Wire the generated hero banner into the homepage hero section using a static reference to frontend/public/assets/generated/hero-constraint-geometry.dim_1600x600.png."
+          "description": "Verify the public article detail view renders a newly published article by slug for anonymous visitors without runtime errors, and that Markdown content (including any template image) renders via the existing MarkdownRenderer support. Keep all user-facing UI text in English."
         }
       ]
     }

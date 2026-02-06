@@ -1,33 +1,42 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import {
-  useGetArticleBySlug,
   useCreateArticle,
   useUpdateArticle,
   usePublishArticle,
-  useListPublishedArticles,
+  useGetArticleById,
+  useGetAllSlugsAdmin,
 } from '../../hooks/useQueries';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader2, Save, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
+import type { ArticleUpdate } from '../../backend';
 import SlugField from '../../components/admin/SlugField';
 import TagEditor from '../../components/admin/TagEditor';
 import MarkdownRenderer from '../../components/content/MarkdownRenderer';
-import { ArrowLeft, Save, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import type { ArticleUpdate } from '../../backend';
+import { articleTemplates } from '../../content/articleTemplates';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 export default function ArticleEditorPage() {
-  const params = useParams({ strict: false });
   const navigate = useNavigate();
-  const articleId = params.id ? BigInt(params.id) : null;
+  const params = useParams({ strict: false });
+  const articleId = params.id || null;
+  const isEditMode = articleId !== null;
 
-  const { data: allArticles = [] } = useListPublishedArticles();
-  const currentArticle = articleId ? allArticles.find((a) => a.id === articleId) : null;
-
+  const { data: article, isLoading: articleLoading } = useGetArticleById(articleId);
+  const { data: existingSlugs = [] } = useGetAllSlugsAdmin();
   const createArticle = useCreateArticle();
   const updateArticle = useUpdateArticle();
   const publishArticle = usePublishArticle();
@@ -38,43 +47,43 @@ export default function ArticleEditorPage() {
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [published, setPublished] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
 
-  // Load article data if editing
+  // Load article data in edit mode
   useEffect(() => {
-    if (currentArticle) {
-      setTitle(currentArticle.title);
-      setSlug(currentArticle.slug);
-      setContent(currentArticle.content);
-      setAuthor(currentArticle.author || '');
-      setTags(currentArticle.tags);
-      setPublished(currentArticle.published);
+    if (article) {
+      setTitle(article.title);
+      setSlug(article.slug);
+      setContent(article.content);
+      setAuthor(article.author || '');
+      setTags(article.tags);
+      setPublished(article.published);
     }
-  }, [currentArticle]);
+  }, [article]);
+
+  // Load template when selected
+  const handleTemplateSelect = (templateSlug: string) => {
+    if (!templateSlug) return;
+    
+    const template = articleTemplates.find(t => t.slug === templateSlug);
+    if (template) {
+      setTitle(template.title);
+      setSlug(template.slug);
+      setContent(template.content);
+      setAuthor(template.author || '');
+      setTags(template.tags);
+      setSelectedTemplate(templateSlug);
+      toast.success(`Template "${template.title}" loaded`);
+    }
+  };
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      toast.error('Please enter a title');
-      return;
-    }
-    if (!slug.trim()) {
-      toast.error('Please enter a slug');
-      return;
-    }
-    if (!content.trim()) {
-      toast.error('Please enter content');
+    if (!title.trim() || !slug.trim() || !content.trim()) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
-    // Check slug uniqueness
-    const slugExists = allArticles.some(
-      (a) => a.slug === slug && (!articleId || a.id !== articleId)
-    );
-    if (slugExists) {
-      toast.error('This slug is already in use. Please choose a different one.');
-      return;
-    }
-
-    const update: ArticleUpdate = {
+    const articleUpdate: ArticleUpdate = {
       title: title.trim(),
       content: content.trim(),
       author: author.trim() || undefined,
@@ -82,15 +91,19 @@ export default function ArticleEditorPage() {
     };
 
     try {
-      if (articleId) {
-        // Update existing article
-        await updateArticle.mutateAsync({ id: articleId, update });
+      if (isEditMode && articleId) {
+        await updateArticle.mutateAsync({ id: BigInt(articleId), update: articleUpdate });
         toast.success('Article updated successfully');
       } else {
-        // Create new article
-        await createArticle.mutateAsync({ slug: slug.trim(), update });
+        const newArticle = await createArticle.mutateAsync({ slug: slug.trim(), update: articleUpdate });
         toast.success('Article created successfully');
-        navigate({ to: '/admin' });
+        // Navigate to edit mode for the newly created article
+        if (newArticle && newArticle.id) {
+          navigate({ to: '/admin/articles/$id', params: { id: newArticle.id.toString() } });
+        } else {
+          // Fallback: navigate to dashboard
+          navigate({ to: '/admin' });
+        }
       }
     } catch (error: any) {
       console.error('Error saving article:', error);
@@ -99,41 +112,70 @@ export default function ArticleEditorPage() {
   };
 
   const handleTogglePublish = async () => {
-    if (!articleId) {
-      toast.error('Please save the article first');
+    if (!isEditMode || !articleId) {
+      toast.error('Please save the article before publishing');
       return;
     }
 
     try {
-      await publishArticle.mutateAsync({ id: articleId, published: !published });
+      await publishArticle.mutateAsync({ id: BigInt(articleId), published: !published });
       setPublished(!published);
       toast.success(published ? 'Article unpublished' : 'Article published');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling publish status:', error);
-      toast.error('Failed to update publish status');
+      toast.error(error.message || 'Failed to update publish status');
     }
   };
 
-  const isSaving = createArticle.isPending || updateArticle.isPending || publishArticle.isPending;
+  if (articleLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex items-center justify-center min-h-[40vh]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Loading article...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const isSaving = createArticle.isPending || updateArticle.isPending;
+  const isPublishing = publishArticle.isPending;
+
+  // Filter out current article's slug from existing slugs check
+  const slugsToCheck = isEditMode && article ? existingSlugs.filter(s => s !== article.slug) : existingSlugs;
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate({ to: '/admin' })}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
           <div className="flex items-center gap-4">
-            {articleId && (
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/admin' })}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight">
+                {isEditMode ? 'Edit Article' : 'Create Article'}
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {isEditMode ? 'Update your article content' : 'Write a new article'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            {isEditMode && (
               <div className="flex items-center gap-2">
-                <Label htmlFor="publish-toggle">Published</Label>
+                <Label htmlFor="publish-toggle" className="text-sm font-medium">
+                  {published ? 'Published' : 'Draft'}
+                </Label>
                 <Switch
                   id="publish-toggle"
                   checked={published}
                   onCheckedChange={handleTogglePublish}
-                  disabled={isSaving}
+                  disabled={isPublishing}
                 />
               </div>
             )}
@@ -153,65 +195,100 @@ export default function ArticleEditorPage() {
           </div>
         </div>
 
+        {/* Template Selector (only in create mode) */}
+        {!isEditMode && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Start from a Template</CardTitle>
+              <CardDescription>
+                Choose a predefined template to get started quickly
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a template (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {articleTemplates.map((template) => (
+                    <SelectItem key={template.slug} value={template.slug}>
+                      {template.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Editor */}
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter article title"
+        <Tabs defaultValue="edit" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="edit">Edit</TabsTrigger>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="edit" className="space-y-6 mt-6">
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter article title"
+              />
+            </div>
+
+            {/* Slug */}
+            <SlugField
+              value={slug}
+              onChange={setSlug}
+              existingSlugs={slugsToCheck}
+              disabled={isEditMode}
             />
-          </div>
 
-          <SlugField
-            value={slug}
-            onChange={setSlug}
-            existingSlugs={allArticles
-              .filter((a) => !articleId || a.id !== articleId)
-              .map((a) => a.slug)}
-            disabled={!!articleId}
-          />
+            {/* Author */}
+            <div className="space-y-2">
+              <Label htmlFor="author">Author</Label>
+              <Input
+                id="author"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Enter author name (optional)"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="author">Author (optional)</Label>
-            <Input
-              id="author"
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
-              placeholder="Enter author name"
-            />
-          </div>
+            {/* Tags */}
+            <TagEditor tags={tags} onChange={setTags} />
 
-          <TagEditor tags={tags} onChange={setTags} />
-
-          <Tabs defaultValue="edit" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="edit">Edit</TabsTrigger>
-              <TabsTrigger value="preview">Preview</TabsTrigger>
-            </TabsList>
-            <TabsContent value="edit" className="space-y-2">
-              <Label htmlFor="content">Content (Markdown)</Label>
+            {/* Content */}
+            <div className="space-y-2">
+              <Label htmlFor="content">Content * (Markdown supported)</Label>
               <Textarea
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your article content in Markdown..."
-                className="min-h-[500px] font-mono"
+                className="min-h-[400px] font-mono text-sm"
               />
-            </TabsContent>
-            <TabsContent value="preview" className="min-h-[500px]">
-              <div className="prose prose-lg dark:prose-invert max-w-none p-6 border border-border rounded-lg">
-                {content ? (
+            </div>
+          </TabsContent>
+
+          <TabsContent value="preview" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>{title || 'Untitled Article'}</CardTitle>
+                {author && <CardDescription>By {author}</CardDescription>}
+              </CardHeader>
+              <CardContent>
+                <div className="prose prose-lg dark:prose-invert max-w-none">
                   <MarkdownRenderer content={content} />
-                ) : (
-                  <p className="text-muted-foreground">Nothing to preview yet...</p>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

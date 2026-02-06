@@ -1,11 +1,12 @@
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Mail, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 import LoginButton from '../auth/LoginButton';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { useIsCallerAdmin } from '../../hooks/useQueries';
 import { SiCoffeescript } from 'react-icons/si';
+import { PUBLIC_CONTACT } from '../../config/publicContact';
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,13 +36,13 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <img
-                src="/assets/generated/startup-logo.dim_512x512.png"
-                alt="Logo"
+                src="/assets/generated/invariant-logo-convergence.dim_256x256.png"
+                alt="INVARIANT Logo"
                 className="h-10 w-10 object-contain"
               />
-              <span className="font-semibold text-lg hidden sm:inline-block">
-                Constraint Geometry Research
-              </span>
+              <div className="hidden sm:block">
+                <span className="font-bold text-lg">INVARIANT</span>
+              </div>
             </Link>
 
             {/* Desktop Navigation */}
@@ -114,13 +115,29 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 caffeine.ai
               </a>
             </div>
-            <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-              <Link to="/articles" className="hover:text-foreground transition-colors">
+            <div className="flex items-center space-x-6 text-sm">
+              <Link to="/articles" className="text-muted-foreground hover:text-foreground transition-colors">
                 Articles
               </Link>
-              <Link to="/about" className="hover:text-foreground transition-colors">
+              <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
                 About
               </Link>
+              <a
+                href={`mailto:${PUBLIC_CONTACT.email}`}
+                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                aria-label="Email"
+              >
+                <Mail className="h-4 w-4" />
+              </a>
+              <a
+                href={PUBLIC_CONTACT.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                aria-label="LinkedIn"
+              >
+                <Linkedin className="h-4 w-4" />
+              </a>
             </div>
           </div>
         </div>

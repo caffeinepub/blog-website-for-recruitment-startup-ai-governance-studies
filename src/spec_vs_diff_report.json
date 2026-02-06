@@ -1,122 +1,60 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T14:58:29.619Z",
-  "summary": "Diff adds a TanStack Router-based frontend with public pages (home/articles/detail/about), an admin area guarded by Internet Identity + admin check, a Markdown editor/preview UI, and a Motoko single-actor backend with stable maps for articles plus access-control mixins. Several requested blog/article fields and admin list semantics are not clearly met from the shown changes, and some extra authorization/profile/token mechanisms appear that were not requested.",
+  "generatedAt": "2026-02-06T18:55:48.140Z",
+  "summary": "REQ-55 appears implemented by adding a new ArticleTemplate in `frontend/src/content/articleTemplates.ts` and wiring template loading into the Admin Article Editor. REQ-56 appears largely implemented by adding guest-access public article queries in `backend/main.mo` and updating the public pages/hooks to use them. However, the new template includes a Markdown image referencing an asset that is not shown as added in the diff, so the acceptance criterion about Markdown images rendering correctly cannot be confirmed from the provided changes. Several substantial unrelated changes (auth/profile/admin guard, homepage redesign, branding updates, etc.) were introduced without being requested.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Admin dashboard lists all articles with status (draft/published), updated time, and quick actions (edit, publish/unpublish, delete).",
-      "reason": "Admin dashboard appears to use the public hook `useListPublishedArticles`, which (per hooks/backend) returns only published articles, so drafts/unpublished articles likely won't appear in the admin list.",
+      "id": "REQ-56",
+      "requirement": "If the new article includes Markdown images, they render correctly using the existing Markdown image support (no broken layout).",
+      "reason": "The new template content includes a Markdown image pointing at `/assets/generated/article-recruitment-india.dim_1600x900.png`, but the diff shows no added static asset files, so it is not verifiable that the referenced image exists and will render correctly.",
       "evidence": [
-        "frontend/src/pages/admin/AdminDashboardPage.tsx (imports/uses useListPublishedArticles)",
-        "frontend/src/hooks/useQueries.ts (useListPublishedArticles calls actor.listPublishedArticles)",
-        "backend/main.mo (listPublishedArticles filters article.published)"
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "requirement": "Editor supports editing metadata fields including summary/excerpt and created/updated timestamps.",
-      "reason": "The editor state and backend Article/ArticleUpdate types shown include title/slug/content/author/tags/published/timestamp, but no summary/excerpt field and no separate created/updated timestamps (only a single `timestamp`).",
-      "evidence": [
-        "frontend/src/pages/admin/ArticleEditorPage.tsx (state fields: title, slug, content, author, tags, published; no summary/excerpt or timestamps)",
-        "backend/main.mo (type Article has timestamp only; no summary/excerpt, createdAt/updatedAt)",
-        "backend/main.mo (type ArticleUpdate includes title/content/author/tags only)"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Expose query/update methods needed by the frontend for fetching by slug/id and admin CRUD operations.",
-      "reason": "Only a slug-based fetch is evidenced (`getArticleBySlug`). No fetch-by-id method is shown in the backend snippet; update/delete/publish endpoints are truncated so cannot be verified from the provided diff summary.",
-      "evidence": [
-        "backend/main.mo (shows getArticleBySlug; no get-by-id method in visible portion; update section truncated)"
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "requirement": "Public articles index provides client-side search by title/summary and filter by tag, with pagination or incremental loading if list is long.",
-      "reason": "Tag filter components exist, but the Articles index page implementation (including search input and pagination/incremental loading behavior) is not shown in the diff summary, so these acceptance criteria are not verifiable from provided evidence.",
-      "evidence": [
-        "frontend/src/components/articles/TagFilterBar.tsx",
-        "frontend/src/components/articles/ArticlesList.tsx",
-        "frontend/src/pages/ArticlesIndexPage (file referenced in App.tsx but not included in diff summary)"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "requirement": "All generated brand images are present under frontend/public/assets/generated with exact filenames; header uses logo; favicon set; homepage uses hero banner.",
-      "reason": "Header references the logo file path, but the actual generated image files, favicon wiring, and homepage hero usage are not shown in the diff summary (and some added files were omitted due to limits).",
-      "evidence": [
-        "frontend/src/components/layout/SiteLayout.tsx (references /assets/generated/startup-logo.dim_512x512.png)",
-        "file-diff (notes omitted added files due to limits: added=10)"
+        "frontend/src/content/articleTemplates.ts (Markdown image reference)",
+        "File diff summary: Added files: none"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "User profile creation/setup flow for admins (name capture) and backend user profile storage.",
-      "reason": "BuildRequest did not request user profiles or profile setup; only Internet Identity admin authentication for content management.",
+      "description": "Added user profile management (get/save caller profile) and expanded authorization/admin route guard behavior.",
+      "reason": "Not requested by REQ-55/REQ-56, which only require adding an article template and ensuring publishing/public visibility.",
       "evidence": [
-        "backend/main.mo (UserProfile type, userProfiles stable map, get/save profile methods)",
-        "frontend/src/components/auth/ProfileSetupModal.tsx",
-        "frontend/src/components/auth/AdminRouteGuard.tsx (prompts profile setup)"
+        "backend/main.mo (User Profile Management, authorization checks)",
+        "frontend-file-summaries.txt (AdminRouteGuard, ProfileSetupModal, AccessDeniedScreen, LoginButton)"
       ]
     },
     {
-      "description": "Secret-token-based access control initialization via URL parameter `caffeineAdminToken`.",
-      "reason": "BuildRequest specifies Internet Identity authentication for owner/admin but does not mention secret tokens or URL-based bootstrapping.",
+      "description": "Redesigned homepage and updated site branding/logo and footer attribution/contact icons.",
+      "reason": "Not requested by REQ-55/REQ-56; BuildRequest explicitly focuses on the admin article template workflow and public article visibility.",
       "evidence": [
-        "frontend/src/hooks/useActor.ts (getSecretParameter('caffeineAdminToken'); calls actor._initializeAccessControlWithSecret)"
+        "frontend-file-summaries.txt (SiteLayout branding/logo changes, HomePage completely redesigned)"
       ]
     },
     {
-      "description": "Extra authorization/role APIs beyond a single admin owner model (e.g., 'user' permission checks and 'getCallerUserRole').",
-      "reason": "Non-goals explicitly avoid multi-author roles/permissions beyond a single admin owner; diff shows role/permission concepts and related queries.",
+      "description": "Added/changed Admin dashboard functionality around \"Default Article Templates\" with per-template \"Create/Update & Publish\" buttons and bulk recreate functionality.",
+      "reason": "Not requested; REQ-55 only requires the template to be selectable from the existing Admin Article Editor dropdown.",
       "evidence": [
-        "backend/main.mo (hasPermission(..., #user); isAdmin checks; AccessControl/MixinAuthorization)",
-        "frontend/src/hooks/useQueries.ts (useGetCallerUserRole; UserRole type import)"
+        "frontend-file-summaries.txt (AdminDashboardPage new template section and bulk recreate)"
       ]
     },
     {
-      "description": "Theme toggling/dark mode infrastructure via next-themes.",
-      "reason": "Not requested; only a coherent theme and non-blue/purple palette were required.",
+      "description": "Implemented new backend public endpoints for listing/searching published articles and fetching published articles by slug.",
+      "reason": "Not explicitly requested as new API surface; REQ-56 only requires that published articles appear on existing public pages. This may be an implementation choice beyond the request.",
       "evidence": [
-        "frontend/src/App.tsx (ThemeProvider from 'next-themes')",
-        "frontend/src/index.css (.dark palette variables)"
+        "backend/main.mo (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag)",
+        "frontend/src/hooks/useQueries.ts (useListPublishedArticles, useGetPublicArticleBySlug, useSearchArticlesByTag)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
-    "all_files_summary.json",
     "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/index.css",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/components/admin/SlugField.tsx",
-    "frontend/src/components/admin/TagEditor.tsx",
-    "frontend/src/components/articles/ArticlesList.tsx",
-    "frontend/src/components/articles/TagFilterBar.tsx",
-    "frontend/src/components/auth/AccessDeniedScreen.tsx",
-    "frontend/src/components/auth/AdminRouteGuard.tsx",
-    "frontend/src/components/auth/LoginButton.tsx",
-    "frontend/src/components/auth/ProfileSetupModal.tsx",
-    "frontend/src/components/content/MarkdownRenderer.tsx",
-    "frontend/src/components/layout/SiteLayout.tsx",
-    "frontend/src/hooks/useActor.ts",
-    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/content/articleTemplates.ts",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/src/main.tsx",
-    "frontend/src/pages/AboutPage.tsx",
     "frontend/src/pages/ArticleDetailPage.tsx",
     "frontend/src/pages/ArticlesIndexPage.tsx",
-    "frontend/src/pages/HomePage.tsx",
-    "frontend/src/pages/admin/AdminDashboardPage.tsx",
     "frontend/src/pages/admin/ArticleEditorPage.tsx",
-    "frontend/src/utils/urlParams.ts",
-    "frontend/tailwind.config.js",
     "project_state.json"
   ]
 }
