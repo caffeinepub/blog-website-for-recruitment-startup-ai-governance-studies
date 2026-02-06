@@ -1,2 +1,3 @@
-# blog-website-for-recruitment-startup-ai-governance-studies
-Exported from Caffeine project: Blog website for recruitment startup + AI governance studies
+## Blog website for recruitment startup + AI governance studies
+
+To run app build and run docker image: `docker build -t app . docker run -it --network host app`

@@ -1,0 +1,140 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-a-public-facing-blog-website-that-presents-the-user-s-recruitment-startup-work-and-ai-governance-research-constraint-geometry-with-a-homepage-an-articles-index-page-an-article-detail-page-and-an-about-page",
+      "featureTitle": "Create a public-facing blog website that presents the user’s recruitment startup work and AI governance research (constraint geometry) with: a homepage, an articles index page, an article detail page, and an about page.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/content/MarkdownRenderer.tsx",
+        "frontend/src/components/layout/SiteLayout.tsx",
+        "frontend/src/pages/AboutPage.tsx",
+        "frontend/src/pages/ArticleDetailPage.tsx",
+        "frontend/src/pages/ArticlesIndexPage.tsx",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-blog-content-management-with-internet-identity-authentication-so-only-the-authenticated-owner-admin-can-create-edit-publish-unpublish-and-delete-articles",
+      "featureTitle": "Implement blog content management with Internet Identity authentication so only the authenticated owner/admin can create, edit, publish/unpublish, and delete articles.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/AccessDeniedScreen.tsx",
+        "frontend/src/components/auth/AdminRouteGuard.tsx",
+        "frontend/src/components/auth/LoginButton.tsx",
+        "frontend/src/components/auth/ProfileSetupModal.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-an-admin-dashboard-ui-with-an-article-editor-that-supports-writing-and-previewing-article-content-in-markdown-and-editing-metadata-fields-title-slug-summary-excerpt-tags-publish-status-created-updated-timestamps",
+      "featureTitle": "Add an admin dashboard UI with an article editor that supports writing and previewing article content in Markdown, and editing metadata fields (title, slug, summary/excerpt, tags, publish status, created/updated timestamps).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/admin/SlugField.tsx",
+        "frontend/src/components/admin/TagEditor.tsx",
+        "frontend/src/pages/admin/AdminDashboardPage.tsx",
+        "frontend/src/pages/admin/ArticleEditorPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-basic-discoverability-features-on-the-public-articles-index-client-side-search-by-title-summary-and-filter-by-tag-with-pagination-or-incremental-loading-if-the-list-is-long",
+      "featureTitle": "Add basic discoverability features on the public articles index: client-side search by title/summary and filter by tag, with pagination or incremental loading if the list is long.",
+      "files": [
+        "frontend/src/components/articles/ArticlesList.tsx",
+        "frontend/src/components/articles/TagFilterBar.tsx",
+        "frontend/src/pages/ArticlesIndexPage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-apply-a-coherent-visual-theme-across-the-site-typography-spacing-components-and-color-palette-suited-to-a-research-driven-recruitment-ai-governance-blog-avoid-blue-purple-as-primary-brand-colors",
+      "featureTitle": "Apply a coherent visual theme across the site (typography, spacing, components, and color palette) suited to a research-driven recruitment + AI governance blog; avoid blue/purple as primary brand colors.",
+      "files": [
+        "frontend/src/components/layout/SiteLayout.tsx",
+        "frontend/src/index.css",
+        "frontend/src/pages/ArticleDetailPage.tsx",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-and-include-required-static-brand-images-and-wire-them-into-the-frontend-as-static-assets-under-frontend-public-assets-generated-do-not-serve-them-via-the-backend",
+      "featureTitle": "Generate and include required static brand images, and wire them into the frontend as static assets under frontend/public/assets/generated (do not serve them via the backend).",
+      "files": [
+        "frontend/index.html",
+        "frontend/src/components/layout/SiteLayout.tsx",
+        "frontend/src/pages/HomePage.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --radius: 0.5rem;
+        
+        /* Earth-tone palette - warm, natural colors */
+        --background: 0.98 0.01 60;
+        --foreground: 0.25 0.02 60;
+        
+        --card: 1 0 0;
+        --card-foreground: 0.25 0.02 60;
+        
+        --popover: 1 0 0;
+        --popover-foreground: 0.25 0.02 60;
+        
+        /* Warm terracotta/clay primary */
+        --primary: 0.55 0.15 35;
+        --primary-foreground: 0.98 0.01 60;
+        
+        /* Soft sand secondary */
+        --secondary: 0.92 0.02 70;
+        --secondary-foreground: 0.35 0.03 60;
+        
+        /* Muted earth tones */
+        --muted: 0.94 0.01 65;
+        --muted-foreground: 0.50 0.02 60;
+        
+        /* Warm accent - amber/ochre */
+        --accent: 0.85 0.08 55;
+        --accent-foreground: 0.30 0.03 55;
+        
+        --destructive: 0.55 0.20 25;
+        --destructive-foreground: 0.98 0.01 60;
+        
+        --border: 0.88 0.01 65;
+        --input: 0.88 0.01 65;
+        --ring: 0.55 0.15 35;
+        
+        --chart-1: 0.60 0.12 40;
+        --chart-2: 0.65 0.10 80;
+        --chart-3: 0.70 0.08 120;
+        --chart-4: 0.55 0.15 35;
+        --chart-5: 0.75 0.06 160;
+    }
+
+    .dark {
+        /* Dark mode - deep earth tones */
+        --background: 0.18 0.02 50;
+        --foreground: 0.92 0.01 60;
+        
+        --card: 0.22 0.02 50;
+        --card-foreground: 0.92 0.01 60;
+        
+        --popover: 0.20 0.02 50;
+        --popover-foreground: 0.92 0.01 60;
+        
+        /* Lighter terracotta for dark mode */
+        --primary: 0.68 0.14 35;
+        --primary-foreground: 0.18 0.02 50;
+        
+        --secondary: 0.28 0.02 55;
+        --secondary-foreground: 0.92 0.01 60;
+        
+        --muted: 0.30 0.02 55;
+        --muted-foreground: 0.65 0.01 60;
+        
+        --accent: 0.75 0.10 50;
+        --accent-foreground: 0.18 0.02 50;
+        
+        --destructive: 0.60 0.18 25;
+        --destructive-foreground: 0.92 0.01 60;
+        
+        --border: 0.30 0.02 55;
+        --input: 0.30 0.02 55;
+        --ring: 0.68 0.14 35;
+        
+        --chart-1: 0.65 0.12 40;
+        --chart-2: 0.70 0.10 80;
+        --chart-3: 0.75 0.08 120;
+        --chart-4: 0.60 0.15 35;
+        --chart-5: 0.80 0.06 160;
+    }
+
+    * {
+        @apply border-border;
+    }
+    
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "rlig" 1, "calt" 1;
+    }
+    
+    /* Enhanced typography for long-form reading */
+    .prose {
+        @apply text-foreground;
+    }
+    
+    .prose h1,
+    .prose h2,
+    .prose h3,
+    .prose h4 {
+        @apply font-bold tracking-tight;
+    }
+    
+    .prose p {
+        @apply leading-relaxed;
+    }
+    
+    .prose a {
+        @apply text-primary hover:text-primary/80 transition-colors;
+    }
+    
+    .prose code {
+        @apply bg-muted text-foreground rounded px-1 py-0.5;
+    }
+    
+    .prose pre {
+        @apply bg-muted rounded-lg p-4 overflow-x-auto;
+    }
+    
+    .prose blockquote {
+        @apply border-l-4 border-primary pl-4 italic text-muted-foreground;
+    }
+}

@@ -1,0 +1,122 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-06T14:58:29.619Z",
+  "summary": "Diff adds a TanStack Router-based frontend with public pages (home/articles/detail/about), an admin area guarded by Internet Identity + admin check, a Markdown editor/preview UI, and a Motoko single-actor backend with stable maps for articles plus access-control mixins. Several requested blog/article fields and admin list semantics are not clearly met from the shown changes, and some extra authorization/profile/token mechanisms appear that were not requested.",
+  "missing_requirements": [
+    {
+      "id": "REQ-3",
+      "requirement": "Admin dashboard lists all articles with status (draft/published), updated time, and quick actions (edit, publish/unpublish, delete).",
+      "reason": "Admin dashboard appears to use the public hook `useListPublishedArticles`, which (per hooks/backend) returns only published articles, so drafts/unpublished articles likely won't appear in the admin list.",
+      "evidence": [
+        "frontend/src/pages/admin/AdminDashboardPage.tsx (imports/uses useListPublishedArticles)",
+        "frontend/src/hooks/useQueries.ts (useListPublishedArticles calls actor.listPublishedArticles)",
+        "backend/main.mo (listPublishedArticles filters article.published)"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Editor supports editing metadata fields including summary/excerpt and created/updated timestamps.",
+      "reason": "The editor state and backend Article/ArticleUpdate types shown include title/slug/content/author/tags/published/timestamp, but no summary/excerpt field and no separate created/updated timestamps (only a single `timestamp`).",
+      "evidence": [
+        "frontend/src/pages/admin/ArticleEditorPage.tsx (state fields: title, slug, content, author, tags, published; no summary/excerpt or timestamps)",
+        "backend/main.mo (type Article has timestamp only; no summary/excerpt, createdAt/updatedAt)",
+        "backend/main.mo (type ArticleUpdate includes title/content/author/tags only)"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Expose query/update methods needed by the frontend for fetching by slug/id and admin CRUD operations.",
+      "reason": "Only a slug-based fetch is evidenced (`getArticleBySlug`). No fetch-by-id method is shown in the backend snippet; update/delete/publish endpoints are truncated so cannot be verified from the provided diff summary.",
+      "evidence": [
+        "backend/main.mo (shows getArticleBySlug; no get-by-id method in visible portion; update section truncated)"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "Public articles index provides client-side search by title/summary and filter by tag, with pagination or incremental loading if list is long.",
+      "reason": "Tag filter components exist, but the Articles index page implementation (including search input and pagination/incremental loading behavior) is not shown in the diff summary, so these acceptance criteria are not verifiable from provided evidence.",
+      "evidence": [
+        "frontend/src/components/articles/TagFilterBar.tsx",
+        "frontend/src/components/articles/ArticlesList.tsx",
+        "frontend/src/pages/ArticlesIndexPage (file referenced in App.tsx but not included in diff summary)"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "All generated brand images are present under frontend/public/assets/generated with exact filenames; header uses logo; favicon set; homepage uses hero banner.",
+      "reason": "Header references the logo file path, but the actual generated image files, favicon wiring, and homepage hero usage are not shown in the diff summary (and some added files were omitted due to limits).",
+      "evidence": [
+        "frontend/src/components/layout/SiteLayout.tsx (references /assets/generated/startup-logo.dim_512x512.png)",
+        "file-diff (notes omitted added files due to limits: added=10)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "User profile creation/setup flow for admins (name capture) and backend user profile storage.",
+      "reason": "BuildRequest did not request user profiles or profile setup; only Internet Identity admin authentication for content management.",
+      "evidence": [
+        "backend/main.mo (UserProfile type, userProfiles stable map, get/save profile methods)",
+        "frontend/src/components/auth/ProfileSetupModal.tsx",
+        "frontend/src/components/auth/AdminRouteGuard.tsx (prompts profile setup)"
+      ]
+    },
+    {
+      "description": "Secret-token-based access control initialization via URL parameter `caffeineAdminToken`.",
+      "reason": "BuildRequest specifies Internet Identity authentication for owner/admin but does not mention secret tokens or URL-based bootstrapping.",
+      "evidence": [
+        "frontend/src/hooks/useActor.ts (getSecretParameter('caffeineAdminToken'); calls actor._initializeAccessControlWithSecret)"
+      ]
+    },
+    {
+      "description": "Extra authorization/role APIs beyond a single admin owner model (e.g., 'user' permission checks and 'getCallerUserRole').",
+      "reason": "Non-goals explicitly avoid multi-author roles/permissions beyond a single admin owner; diff shows role/permission concepts and related queries.",
+      "evidence": [
+        "backend/main.mo (hasPermission(..., #user); isAdmin checks; AccessControl/MixinAuthorization)",
+        "frontend/src/hooks/useQueries.ts (useGetCallerUserRole; UserRole type import)"
+      ]
+    },
+    {
+      "description": "Theme toggling/dark mode infrastructure via next-themes.",
+      "reason": "Not requested; only a coherent theme and non-blue/purple palette were required.",
+      "evidence": [
+        "frontend/src/App.tsx (ThemeProvider from 'next-themes')",
+        "frontend/src/index.css (.dark palette variables)"
+      ]
+    }
+  ],
+  "confidence": 0.62,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/admin/SlugField.tsx",
+    "frontend/src/components/admin/TagEditor.tsx",
+    "frontend/src/components/articles/ArticlesList.tsx",
+    "frontend/src/components/articles/TagFilterBar.tsx",
+    "frontend/src/components/auth/AccessDeniedScreen.tsx",
+    "frontend/src/components/auth/AdminRouteGuard.tsx",
+    "frontend/src/components/auth/LoginButton.tsx",
+    "frontend/src/components/auth/ProfileSetupModal.tsx",
+    "frontend/src/components/content/MarkdownRenderer.tsx",
+    "frontend/src/components/layout/SiteLayout.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/AboutPage.tsx",
+    "frontend/src/pages/ArticleDetailPage.tsx",
+    "frontend/src/pages/ArticlesIndexPage.tsx",
+    "frontend/src/pages/HomePage.tsx",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
+    "frontend/src/pages/admin/ArticleEditorPage.tsx",
+    "frontend/src/utils/urlParams.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

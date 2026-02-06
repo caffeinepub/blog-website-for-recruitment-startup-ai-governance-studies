@@ -1,0 +1,154 @@
+{
+  "kind": "build_request",
+  "title": "Blog website for recruitment startup + AI governance studies",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create a public-facing blog website that presents the user’s recruitment startup work and AI governance research (constraint geometry) with: a homepage, an articles index page, an article detail page, and an about page.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "i need a blog website do publish articles and studies about my own recruitment startup and related to my own work in AI field related to constraint geometry in AI governance"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Navigating to the app shows a homepage with clear entry points to Articles and About.",
+        "Articles index page lists published posts with title, date, short excerpt, and tags/labels (if present).",
+        "Clicking an article from the index opens an article detail page with full content and metadata.",
+        "About page exists and contains placeholder sections for the startup and the AI governance/constraint geometry focus."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement blog content management with Internet Identity authentication so only the authenticated owner/admin can create, edit, publish/unpublish, and delete articles.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "i need a blog website do publish articles and studies about my own recruitment startup and related to my own work in AI field related to constraint geometry in AI governance"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Unauthenticated users cannot access admin/editor screens or call write endpoints successfully.",
+        "Authenticated admin can create a draft article, edit it, publish it, unpublish it, and delete it.",
+        "Published articles are visible on public pages; drafts/unpublished articles are not visible publicly."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Add an admin dashboard UI with an article editor that supports writing and previewing article content in Markdown, and editing metadata fields (title, slug, summary/excerpt, tags, publish status, created/updated timestamps).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Admin dashboard lists all articles with status (draft/published), updated time, and quick actions (edit, publish/unpublish, delete).",
+        "Editor supports Markdown input and a preview mode.",
+        "Slug is validated for uniqueness and URL-safety before publishing/saving (with a clear error message on conflict)."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Persist blog articles in the Motoko backend (single-actor) with stable storage across upgrades, and expose query/update methods needed by the frontend for: listing published articles, fetching by slug/id, searching/filtering by tag, and admin CRUD operations.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend provides query methods for public: list published articles and fetch a published article by slug (or id).",
+        "Backend provides admin-only update methods for create/update/delete and publish/unpublish.",
+        "Articles persist across canister redeploy/upgrade using stable state patterns; no data loss for saved articles."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Add basic discoverability features on the public articles index: client-side search by title/summary and filter by tag, with pagination or incremental loading if the list is long.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "User can type into a search field and see the list filter by matching title/summary.",
+        "User can click a tag filter and see only articles with that tag.",
+        "If pagination/incremental loading is used, the UI clearly indicates more results and loads the next set correctly."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Apply a coherent visual theme across the site (typography, spacing, components, and color palette) suited to a research-driven recruitment + AI governance blog; avoid blue/purple as primary brand colors.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All pages share consistent layout primitives (header, content width, headings, article typography).",
+        "Primary accents are not blue/purple; the palette is applied consistently to buttons/links/highlights.",
+        "Article detail typography is optimized for long-form reading (line length, headings, code/quotes if present)."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Generate and include required static brand images, and wire them into the frontend as static assets under frontend/public/assets/generated (do not serve them via the backend).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All generated images are present in frontend/public/assets/generated with the exact filenames requested.",
+        "Header/site chrome uses the generated logo and favicon is set.",
+        "Homepage uses the generated hero banner."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not edit immutable hook/entry files listed by the platform (compose around them).",
+    "Use English for all user-facing UI text."
+  ],
+  "nonGoals": [
+    "Multi-author roles/permissions beyond a single admin owner.",
+    "Comments, likes, user accounts beyond Internet Identity admin.",
+    "External CMS integration (e.g., Ghost, WordPress) or external databases.",
+    "Real-time features (chat, websockets, live updates)."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Minimal geometric logo mark with wordmark, monochrome/earth-tone palette (startup-logo.dim_512x512.png)",
+      "Wide hero banner illustration featuring abstract constraint-geometry motifs (hero-constraint-geometry.dim_1600x600.png)",
+      "Simple favicon derived from the logo mark (favicon-constraint.dim_64x64.png)"
+    ],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [
+      "Publish articles and studies about a recruitment startup and AI governance research (constraint geometry)."
+    ],
+    "goalsToRemove": [],
+    "preferencesToAdd": [
+      "Use English in the UI.",
+      "Prefer a research/editorial visual style; avoid blue/purple as primary colors."
+    ],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}
