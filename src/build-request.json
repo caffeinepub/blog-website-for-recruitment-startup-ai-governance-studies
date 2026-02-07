@@ -1,69 +1,116 @@
 {
   "kind": "build_request",
-  "title": "Create and publish a new article via the admin workflow",
+  "title": "Fix Articles page load error and persist/display generated articles",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-55",
-      "text": "Create a new long-form article (English) by adding a new entry to `frontend/src/content/articleTemplates.ts` so it can be loaded from the Admin Article Editor “Start from a Template” dropdown and then saved/published through the existing admin workflow.",
+      "id": "REQ-1",
+      "text": "Fix the public Articles index page so it reliably loads without throwing an error, and show a user-friendly error state that includes actionable details (while keeping the page layout intact).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "user-articles-issue-1",
+          "user-articles-issue-2"
         ],
         "quotes": [
-          "create the article"
+          "issue with articles page",
+          "the page is not loading and is showing error"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/src/content/articleTemplates.ts` includes one new `ArticleTemplate` with a unique `slug`, `title`, `tags`, and non-empty Markdown `content`.",
-        "The Admin Article Editor page template selector lists the new template and successfully loads its title/slug/content/author/tags into the editor when selected.",
-        "All user-facing text inside the new article content is written in English.",
-        "The new template slug does not conflict with any existing template slugs and remains URL-safe (lowercase, hyphenated)."
+        "Navigating to the Articles index route renders either a list, an empty state, or a readable error state (no uncaught exceptions).",
+        "If the backend call fails, the UI shows the error message text and does not get stuck in a loading state.",
+        "The page works for both anonymous users and logged-in users."
       ]
     },
     {
-      "id": "REQ-56",
-      "text": "Ensure the created article can be published and appears publicly: after an admin saves and publishes an article created from the new template, it must show on the public Articles index (`/articles`) and the article detail page (`/articles/$slug`) must render successfully for anonymous visitors.",
-      "target": "both",
+      "id": "REQ-2",
+      "text": "Fix the Articles data flow so published articles returned from the canister are correctly parsed and rendered in the Articles list and article cards (IDs, timestamps, tags, and slugs).",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "user-articles-issue-3"
         ],
         "quotes": [
-          "create the article"
+          "article page always has isues and it never showed any real articles even thugh the system generated articles"
         ]
       },
       "acceptanceCriteria": [
-        "Admin can: load the new template, click “Save” to create the article, then toggle publish to “Published” without errors.",
-        "As an anonymous (logged-out) visitor, `/articles` lists the newly published article in the results.",
-        "As an anonymous (logged-out) visitor, navigating to `/articles/<new-template-slug>` renders the article title and Markdown content without runtime errors.",
-        "If the new article includes Markdown images, they render correctly using the existing Markdown image support (no broken layout)."
+        "When the backend returns one or more published articles, the Articles index page renders them as cards with title, excerpt, tags, and date.",
+        "Clicking an article card navigates to the corresponding article detail route using the article.slug.",
+        "No runtime type errors occur when reading article fields (e.g., BigInt/Nat IDs, timestamps)."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "user-articles-issue-3",
+          "user-articles-issue-4"
+        ],
+        "quotes": [
+          "article page always has isues and it never showed any real articles even thugh the system generated articles",
+          "you generated the articles in previous ession and said you will post but never happened. and no article page never displayed any article"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After creating and publishing at least one article, upgrading/redeploying the canister preserves published articles (they still appear via listPublishedArticles).",
+        "Admin listAllArticlesAdmin continues to show all stored articles after upgrade.",
+        "User profiles saved via saveCallerUserProfile persist after upgrade."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "user-articles-issue-1",
+          "user-articles-issue-2"
+        ],
+        "quotes": [
+          "issue with articles page",
+          "the page is not loading and is showing error"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Calling listPublishedArticles as an anonymous principal returns a list (possibly empty) and never traps due to authorization checks.",
+        "If multiple published articles exist, listPublishedArticles returns them in a consistent order (newest first) across calls.",
+        "Calling getPublicArticleBySlug for an unpublished or missing slug returns null (or a non-trapping not-found outcome consistent with the existing API contract used by the frontend)."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Provide an admin-visible way in the UI to (re)publish the built-in article templates into the canister, so the public Articles page can display real published articles after a fresh deployment.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "user-articles-issue-4"
+        ],
+        "quotes": [
+          "you generated the articles in previous ession and said you will post but never happened."
+        ]
+      },
+      "acceptanceCriteria": [
+        "From the existing admin area, an admin can trigger publishing/recreating the default article templates into the backend without manual canister calls.",
+        "After running the action successfully, the public Articles page shows the newly published template articles without needing a hard refresh (React Query cache invalidation works)."
       ]
     }
   ],
   "constraints": [
-    "Keep all user-facing UI text in English.",
-    "Do not edit files under `frontend/src/components/ui` (read-only shadcn components).",
-    "Backend must remain a single Motoko actor in `backend/main.mo`; only add `backend/migration.mo` if a state upgrade is required."
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
+    "Do not edit files under frontend/src/components/ui or any frontend immutablePaths (compose instead of modifying read-only sources).",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not introduce new routes/pages for the public site or admin.",
-    "Do not add third-party authentication providers (Internet Identity remains the only auth method).",
-    "Do not add external database or off-chain storage for articles."
+    "Adding third-party authentication providers (only Internet Identity is supported).",
+    "Adding external databases or non-Internet Computer storage services.",
+    "Building new article generation via an LLM or external API integration."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

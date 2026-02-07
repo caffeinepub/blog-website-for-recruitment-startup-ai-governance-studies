@@ -1,278 +1,101 @@
-import React from 'react';
+import { maskSubstrateNames } from '@/utils/layerMask';
 
 interface MarkdownRendererProps {
   content: string;
+  className?: string;
 }
 
-export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
-  // Safe content handling - coerce to string and handle empty/invalid inputs
-  const safeContent = typeof content === 'string' ? content : '';
+export default function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+  // Coerce to string and handle empty/null/undefined
+  const safeContent = content != null ? String(content) : '';
+  
+  // Check for empty content after coercion
+  if (!safeContent.trim()) {
+    return <div className={className}>No content available.</div>;
+  }
 
-  const parseMarkdown = (text: string) => {
-    if (!text) {
-      return [];
-    }
+  // Apply substrate name masking at render time
+  const maskedContent = maskSubstrateNames(safeContent);
 
-    const lines = text.split('\n');
-    const elements: React.ReactElement[] = [];
-    let currentParagraph: string[] = [];
-    let inCodeBlock = false;
-    let codeBlockContent: string[] = [];
-    let listItems: string[] = [];
-    let listType: 'ul' | 'ol' | null = null;
-    let key = 0;
+  // Simple markdown-to-HTML conversion without external dependencies
+  const renderMarkdown = (text: string): string => {
+    let html = text;
 
-    const flushParagraph = () => {
-      if (currentParagraph.length > 0) {
-        const content = currentParagraph.join(' ');
-        elements.push(
-          <p key={key++} className="mb-4 leading-7">
-            {parseInline(content)}
-          </p>
-        );
-        currentParagraph = [];
-      }
-    };
+    // Escape HTML to prevent XSS
+    html = html
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
 
-    const flushList = () => {
-      if (listItems.length > 0 && listType) {
-        const ListTag = listType;
-        elements.push(
-          <ListTag
-            key={key++}
-            className={`${listType === 'ul' ? 'list-disc' : 'list-decimal'} list-inside mb-4 space-y-2`}
-          >
-            {listItems.map((item, idx) => (
-              <li key={idx} className="leading-7">
-                {parseInline(item)}
-              </li>
-            ))}
-          </ListTag>
-        );
-        listItems = [];
-        listType = null;
-      }
-    };
+    // Headers (must come before other replacements)
+    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
-    const flushCodeBlock = () => {
-      if (codeBlockContent.length > 0) {
-        elements.push(
-          <pre key={key++} className="bg-muted rounded-lg p-4 overflow-x-auto my-4">
-            <code className="text-sm font-mono">{codeBlockContent.join('\n')}</code>
-          </pre>
-        );
-        codeBlockContent = [];
-      }
-    };
+    // Bold
+    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const trimmed = line.trim();
+    // Italic
+    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    html = html.replace(/_(.+?)_/g, '<em>$1</em>');
 
-      // Code blocks
-      if (trimmed.startsWith('```')) {
-        flushParagraph();
-        flushList();
-        if (inCodeBlock) {
-          flushCodeBlock();
-          inCodeBlock = false;
-        } else {
-          inCodeBlock = true;
+    // Links - mask alt text in the replacement
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+      const maskedText = maskSubstrateNames(text);
+      const isExternal = url.startsWith('http');
+      const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+      return `<a href="${url}"${target}>${maskedText}</a>`;
+    });
+
+    // Images - mask alt text
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
+      const maskedAlt = maskSubstrateNames(alt);
+      return `<img src="${url}" alt="${maskedAlt}" />`;
+    });
+
+    // Code blocks
+    html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+    
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Lists - unordered
+    html = html.replace(/^\* (.+)$/gim, '<li>$1</li>');
+    html = html.replace(/^- (.+)$/gim, '<li>$1</li>');
+    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+    // Lists - ordered
+    html = html.replace(/^\d+\. (.+)$/gim, '<li>$1</li>');
+
+    // Blockquotes
+    html = html.replace(/^> (.+)$/gim, '<blockquote>$1</blockquote>');
+
+    // Horizontal rules
+    html = html.replace(/^---$/gim, '<hr />');
+    html = html.replace(/^\*\*\*$/gim, '<hr />');
+
+    // Line breaks - convert double newlines to paragraphs
+    const paragraphs = html.split(/\n\n+/);
+    html = paragraphs
+      .map(p => {
+        // Don't wrap if already wrapped in a block element
+        if (p.match(/^<(h[1-6]|ul|ol|blockquote|pre|hr)/)) {
+          return p;
         }
-        continue;
-      }
+        return `<p>${p.replace(/\n/g, '<br />')}</p>`;
+      })
+      .join('\n');
 
-      if (inCodeBlock) {
-        codeBlockContent.push(line);
-        continue;
-      }
-
-      // Empty line
-      if (!trimmed) {
-        flushParagraph();
-        flushList();
-        continue;
-      }
-
-      // Image syntax: ![alt](url)
-      const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
-      if (imageMatch) {
-        flushParagraph();
-        flushList();
-        const altText = imageMatch[1];
-        const imageUrl = imageMatch[2];
-        elements.push(
-          <img
-            key={key++}
-            src={imageUrl}
-            alt={altText}
-            className="w-full max-w-full h-auto rounded-lg my-6"
-          />
-        );
-        continue;
-      }
-
-      // Headers
-      if (trimmed.startsWith('# ')) {
-        flushParagraph();
-        flushList();
-        elements.push(
-          <h1 key={key++} className="text-4xl font-bold mt-8 mb-4">
-            {parseInline(trimmed.slice(2))}
-          </h1>
-        );
-        continue;
-      }
-      if (trimmed.startsWith('## ')) {
-        flushParagraph();
-        flushList();
-        elements.push(
-          <h2 key={key++} className="text-3xl font-bold mt-6 mb-3">
-            {parseInline(trimmed.slice(3))}
-          </h2>
-        );
-        continue;
-      }
-      if (trimmed.startsWith('### ')) {
-        flushParagraph();
-        flushList();
-        elements.push(
-          <h3 key={key++} className="text-2xl font-bold mt-5 mb-2">
-            {parseInline(trimmed.slice(4))}
-          </h3>
-        );
-        continue;
-      }
-      if (trimmed.startsWith('#### ')) {
-        flushParagraph();
-        flushList();
-        elements.push(
-          <h4 key={key++} className="text-xl font-bold mt-4 mb-2">
-            {parseInline(trimmed.slice(5))}
-          </h4>
-        );
-        continue;
-      }
-
-      // Blockquote
-      if (trimmed.startsWith('> ')) {
-        flushParagraph();
-        flushList();
-        elements.push(
-          <blockquote key={key++} className="border-l-4 border-primary pl-4 italic my-4">
-            {parseInline(trimmed.slice(2))}
-          </blockquote>
-        );
-        continue;
-      }
-
-      // Unordered list
-      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-        flushParagraph();
-        if (listType !== 'ul') {
-          flushList();
-          listType = 'ul';
-        }
-        listItems.push(trimmed.slice(2));
-        continue;
-      }
-
-      // Ordered list
-      const orderedMatch = trimmed.match(/^\d+\.\s+(.+)$/);
-      if (orderedMatch) {
-        flushParagraph();
-        if (listType !== 'ol') {
-          flushList();
-          listType = 'ol';
-        }
-        listItems.push(orderedMatch[1]);
-        continue;
-      }
-
-      // Regular paragraph
-      flushList();
-      currentParagraph.push(trimmed);
-    }
-
-    // Flush remaining content
-    flushParagraph();
-    flushList();
-    flushCodeBlock();
-
-    return elements;
+    return html;
   };
 
-  const parseInline = (text: string): (string | React.ReactElement)[] => {
-    const parts: (string | React.ReactElement)[] = [];
-    let remaining = text;
-    let key = 0;
+  const htmlContent = renderMarkdown(maskedContent);
 
-    while (remaining) {
-      // Bold **text**
-      const boldMatch = remaining.match(/^(.*?)\*\*(.+?)\*\*(.*)/);
-      if (boldMatch) {
-        if (boldMatch[1]) parts.push(boldMatch[1]);
-        parts.push(
-          <strong key={key++} className="font-bold">
-            {boldMatch[2]}
-          </strong>
-        );
-        remaining = boldMatch[3];
-        continue;
-      }
-
-      // Italic *text*
-      const italicMatch = remaining.match(/^(.*?)\*(.+?)\*(.*)/);
-      if (italicMatch) {
-        if (italicMatch[1]) parts.push(italicMatch[1]);
-        parts.push(
-          <em key={key++} className="italic">
-            {italicMatch[2]}
-          </em>
-        );
-        remaining = italicMatch[3];
-        continue;
-      }
-
-      // Inline code `code`
-      const codeMatch = remaining.match(/^(.*?)`(.+?)`(.*)/);
-      if (codeMatch) {
-        if (codeMatch[1]) parts.push(codeMatch[1]);
-        parts.push(
-          <code key={key++} className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
-            {codeMatch[2]}
-          </code>
-        );
-        remaining = codeMatch[3];
-        continue;
-      }
-
-      // Links [text](url)
-      const linkMatch = remaining.match(/^(.*?)\[(.+?)\]\((.+?)\)(.*)/);
-      if (linkMatch) {
-        if (linkMatch[1]) parts.push(linkMatch[1]);
-        parts.push(
-          <a
-            key={key++}
-            href={linkMatch[3]}
-            className="text-primary hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {linkMatch[2]}
-          </a>
-        );
-        remaining = linkMatch[4];
-        continue;
-      }
-
-      // No more special formatting
-      parts.push(remaining);
-      break;
-    }
-
-    return parts;
-  };
-
-  return <div className="markdown-content">{parseMarkdown(safeContent)}</div>;
+  return (
+    <div 
+      className={`prose prose-invert max-w-none ${className}`}
+      dangerouslySetInnerHTML={{ __html: htmlContent }}
+    />
+  );
 }

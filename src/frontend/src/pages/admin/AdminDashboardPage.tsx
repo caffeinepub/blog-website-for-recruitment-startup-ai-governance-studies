@@ -22,13 +22,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, RefreshCw, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Loader2, RefreshCw, Upload, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import type { Article } from '../../backend';
 import { timestampToDate } from '../../utils/articleDate';
 import { articleTemplates } from '../../content/articleTemplates';
 import { useState } from 'react';
+import { maskSubstrateNames } from '@/utils/layerMask';
 
 export default function AdminDashboardPage() {
   const { data: articles = [], isLoading, error } = useListAllArticlesAdmin();
@@ -42,7 +43,7 @@ export default function AdminDashboardPage() {
   const handleDelete = async (id: bigint, title: string) => {
     try {
       await deleteArticle.mutateAsync(id);
-      toast.success(`Article "${title}" deleted successfully`);
+      toast.success(`Article "${maskSubstrateNames(title)}" deleted successfully`);
     } catch (error: any) {
       console.error('Error deleting article:', error);
       toast.error(error.message || 'Failed to delete article');
@@ -64,7 +65,13 @@ export default function AdminDashboardPage() {
   const handleBulkRecreate = async () => {
     try {
       await bulkRecreate.mutateAsync();
-      toast.success('Default articles recreated and published successfully');
+      toast.success('Default articles recreated and published successfully', {
+        description: 'All template articles are now live on the public Articles page.',
+        action: {
+          label: 'View Articles',
+          onClick: () => navigate({ to: '/articles' }),
+        },
+      });
     } catch (error: any) {
       console.error('Error recreating default articles:', error);
       toast.error(error.message || 'Failed to recreate default articles');
@@ -83,10 +90,16 @@ export default function AdminDashboardPage() {
       });
       
       const action = result.action === 'created' ? 'created and published' : 'updated and published';
-      toast.success(`Article "${template.title}" ${action} successfully`);
+      toast.success(`Article "${maskSubstrateNames(template.title)}" ${action} successfully`, {
+        description: 'The article is now live on the public Articles page.',
+        action: {
+          label: 'View Article',
+          onClick: () => navigate({ to: '/articles/$slug', params: { slug: template.slug } }),
+        },
+      });
     } catch (error: any) {
       console.error('Error publishing template:', error);
-      toast.error(error.message || `Failed to publish "${template.title}"`);
+      toast.error(error.message || `Failed to publish "${maskSubstrateNames(template.title)}"`);
     } finally {
       setProcessingTemplate(null);
     }
@@ -182,7 +195,7 @@ export default function AdminDashboardPage() {
                   
                   return (
                     <TableRow key={template.slug}>
-                      <TableCell className="font-medium">{template.title}</TableCell>
+                      <TableCell className="font-medium">{maskSubstrateNames(template.title)}</TableCell>
                       <TableCell className="font-mono text-sm text-muted-foreground">
                         {template.slug}
                       </TableCell>
@@ -190,7 +203,7 @@ export default function AdminDashboardPage() {
                         <div className="flex flex-wrap gap-1">
                           {template.tags.slice(0, 2).map((tag) => (
                             <Badge key={tag} variant="secondary" className="text-xs">
-                              {tag}
+                              {maskSubstrateNames(tag)}
                             </Badge>
                           ))}
                           {template.tags.length > 2 && (
@@ -291,7 +304,7 @@ export default function AdminDashboardPage() {
 
                     return (
                       <TableRow key={article.id.toString()}>
-                        <TableCell className="font-medium">{article.title}</TableCell>
+                        <TableCell className="font-medium">{maskSubstrateNames(article.title)}</TableCell>
                         <TableCell className="font-mono text-sm text-muted-foreground">
                           {article.slug}
                         </TableCell>
@@ -335,7 +348,7 @@ export default function AdminDashboardPage() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Delete Article</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to delete "{article.title}"? This action
+                                    Are you sure you want to delete "{maskSubstrateNames(article.title)}"? This action
                                     cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>

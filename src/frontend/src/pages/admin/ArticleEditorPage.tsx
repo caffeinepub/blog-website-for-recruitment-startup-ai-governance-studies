@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { maskSubstrateNames } from '@/utils/layerMask';
 
 export default function ArticleEditorPage() {
   const navigate = useNavigate();
@@ -73,7 +74,7 @@ export default function ArticleEditorPage() {
       setAuthor(template.author || '');
       setTags(template.tags);
       setSelectedTemplate(templateSlug);
-      toast.success(`Template "${template.title}" loaded`);
+      toast.success(`Template "${maskSubstrateNames(template.title)}" loaded`);
     }
   };
 
@@ -91,19 +92,13 @@ export default function ArticleEditorPage() {
     };
 
     try {
-      if (isEditMode && articleId) {
-        await updateArticle.mutateAsync({ id: BigInt(articleId), update: articleUpdate });
+      if (isEditMode && article) {
+        await updateArticle.mutateAsync({ id: article.id, update: articleUpdate });
         toast.success('Article updated successfully');
       } else {
-        const newArticle = await createArticle.mutateAsync({ slug: slug.trim(), update: articleUpdate });
+        const result = await createArticle.mutateAsync({ slug: slug.trim(), update: articleUpdate });
         toast.success('Article created successfully');
-        // Navigate to edit mode for the newly created article
-        if (newArticle && newArticle.id) {
-          navigate({ to: '/admin/articles/$id', params: { id: newArticle.id.toString() } });
-        } else {
-          // Fallback: navigate to dashboard
-          navigate({ to: '/admin' });
-        }
+        navigate({ to: '/admin/articles/$id', params: { id: result.id.toString() } });
       }
     } catch (error: any) {
       console.error('Error saving article:', error);
@@ -111,18 +106,15 @@ export default function ArticleEditorPage() {
     }
   };
 
-  const handleTogglePublish = async () => {
-    if (!isEditMode || !articleId) {
-      toast.error('Please save the article before publishing');
-      return;
-    }
+  const handlePublish = async () => {
+    if (!article) return;
 
     try {
-      await publishArticle.mutateAsync({ id: BigInt(articleId), published: !published });
+      await publishArticle.mutateAsync({ id: article.id, published: !published });
       setPublished(!published);
       toast.success(published ? 'Article unpublished' : 'Article published');
     } catch (error: any) {
-      console.error('Error toggling publish status:', error);
+      console.error('Error publishing article:', error);
       toast.error(error.message || 'Failed to update publish status');
     }
   };
@@ -140,47 +132,50 @@ export default function ArticleEditorPage() {
     );
   }
 
-  const isSaving = createArticle.isPending || updateArticle.isPending;
-  const isPublishing = publishArticle.isPending;
-
-  // Filter out current article's slug from existing slugs check
-  const slugsToCheck = isEditMode && article ? existingSlugs.filter(s => s !== article.slug) : existingSlugs;
-
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-5xl mx-auto space-y-8">
+      <div className="max-w-6xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/admin' })}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate({ to: '/admin' })}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
             <div>
               <h1 className="text-4xl font-bold tracking-tight">
-                {isEditMode ? 'Edit Article' : 'Create Article'}
+                {isEditMode ? 'Edit Article' : 'New Article'}
               </h1>
-              <p className="text-muted-foreground mt-2">
-                {isEditMode ? 'Update your article content' : 'Write a new article'}
-              </p>
+              {isEditMode && article && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Editing: {maskSubstrateNames(article.title)}
+                </p>
+              )}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             {isEditMode && (
               <div className="flex items-center gap-2">
-                <Label htmlFor="publish-toggle" className="text-sm font-medium">
+                <Label htmlFor="publish-toggle" className="text-sm">
                   {published ? 'Published' : 'Draft'}
                 </Label>
                 <Switch
                   id="publish-toggle"
                   checked={published}
-                  onCheckedChange={handleTogglePublish}
-                  disabled={isPublishing}
+                  onCheckedChange={handlePublish}
+                  disabled={publishArticle.isPending}
                 />
               </div>
             )}
-            <Button onClick={handleSave} disabled={isSaving}>
-              {isSaving ? (
+            <Button
+              onClick={handleSave}
+              disabled={createArticle.isPending || updateArticle.isPending}
+            >
+              {(createArticle.isPending || updateArticle.isPending) ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving...
@@ -195,24 +190,24 @@ export default function ArticleEditorPage() {
           </div>
         </div>
 
-        {/* Template Selector (only in create mode) */}
+        {/* Template Selector (only for new articles) */}
         {!isEditMode && (
           <Card>
             <CardHeader>
-              <CardTitle>Start from a Template</CardTitle>
+              <CardTitle>Start from Template</CardTitle>
               <CardDescription>
-                Choose a predefined template to get started quickly
+                Choose a template to pre-fill the article fields
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a template (optional)" />
+                  <SelectValue placeholder="Select a template..." />
                 </SelectTrigger>
                 <SelectContent>
                   {articleTemplates.map((template) => (
                     <SelectItem key={template.slug} value={template.slug}>
-                      {template.title}
+                      {maskSubstrateNames(template.title)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -221,7 +216,7 @@ export default function ArticleEditorPage() {
           </Card>
         )}
 
-        {/* Editor */}
+        {/* Editor Tabs */}
         <Tabs defaultValue="edit" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="edit">Edit</TabsTrigger>
@@ -229,7 +224,6 @@ export default function ArticleEditorPage() {
           </TabsList>
 
           <TabsContent value="edit" className="space-y-6 mt-6">
-            {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Title *</Label>
               <Input
@@ -240,15 +234,14 @@ export default function ArticleEditorPage() {
               />
             </div>
 
-            {/* Slug */}
             <SlugField
               value={slug}
               onChange={setSlug}
-              existingSlugs={slugsToCheck}
+              existingSlugs={existingSlugs}
+              currentSlug={article?.slug}
               disabled={isEditMode}
             />
 
-            {/* Author */}
             <div className="space-y-2">
               <Label htmlFor="author">Author</Label>
               <Input
@@ -259,18 +252,16 @@ export default function ArticleEditorPage() {
               />
             </div>
 
-            {/* Tags */}
             <TagEditor tags={tags} onChange={setTags} />
 
-            {/* Content */}
             <div className="space-y-2">
-              <Label htmlFor="content">Content * (Markdown supported)</Label>
+              <Label htmlFor="content">Content * (Markdown)</Label>
               <Textarea
                 id="content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your article content in Markdown..."
-                className="min-h-[400px] font-mono text-sm"
+                className="min-h-[500px] font-mono"
               />
             </div>
           </TabsContent>
@@ -278,13 +269,13 @@ export default function ArticleEditorPage() {
           <TabsContent value="preview" className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>{title || 'Untitled Article'}</CardTitle>
-                {author && <CardDescription>By {author}</CardDescription>}
+                <CardTitle>{maskSubstrateNames(title) || 'Untitled'}</CardTitle>
+                {author && (
+                  <CardDescription>By {maskSubstrateNames(author)}</CardDescription>
+                )}
               </CardHeader>
               <CardContent>
-                <div className="prose prose-lg dark:prose-invert max-w-none">
-                  <MarkdownRenderer content={content} />
-                </div>
+                <MarkdownRenderer content={content} />
               </CardContent>
             </Card>
           </TabsContent>

@@ -2,7 +2,9 @@ import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } fr
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import SiteLayout from './components/layout/SiteLayout';
-import HomePage from './pages/HomePage';
+import RecruitmentPage from './pages/RecruitmentPage';
+import AttritionPage from './pages/AttritionPage';
+import InvariantPage from './pages/InvariantPage';
 import ArticlesIndexPage from './pages/ArticlesIndexPage';
 import ArticleDetailPage from './pages/ArticleDetailPage';
 import AboutPage from './pages/AboutPage';
@@ -19,13 +21,32 @@ const rootRoute = createRootRoute({
   ),
 });
 
-// Public routes
+// Public routes - new 3-page structure
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: HomePage,
+  component: RecruitmentPage,
 });
 
+const recruitmentRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/recruitment',
+  component: RecruitmentPage,
+});
+
+const attritionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/attrition',
+  component: AttritionPage,
+});
+
+const invariantRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/invariant',
+  component: InvariantPage,
+});
+
+// Legacy public routes (still accessible)
 const articlesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/articles',
@@ -77,6 +98,9 @@ const adminEditorEditRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  recruitmentRoute,
+  attritionRoute,
+  invariantRoute,
   articlesRoute,
   articleDetailRoute,
   aboutRoute,
@@ -95,7 +119,7 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <RouterProvider router={router} />
       <Toaster />
     </ThemeProvider>

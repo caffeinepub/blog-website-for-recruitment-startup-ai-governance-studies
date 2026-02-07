@@ -1,441 +1,36 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 41,
-  "summary": "Evolving from a simple blog into a unique ProQruit web presence combining a blog with an AI-integrated recruitment firm vision, where the in-house AI architecture (INVARIANT) acts as a digital “4th partner” to support/automate decisions via data + pattern analysis and real-time cross-verification, with tiered employee access and a website chatbox interface.",
+  "projectStateVersion": 3,
+  "summary": "Project includes an Articles page/feature that is currently failing (page load error) and has never displayed generated/stored articles; user requested to proceed with fixing it.",
   "architectural_notes": [
-    "INVARIANT is a core product concept: a digital '4th partner' for ProQruit, intended to support decisioning via data/pattern analysis and real-time cross-verification.",
-    "Plan for role-based access control (tiered permissions) for employees interacting with INVARIANT and internal business data.",
-    "Public website should include an INVARIANT chatbox entry point for candidates/clients to interact with the AI-powered recruitment experience.",
-    "Deprioritize/skip the global navigation ProQruit.com call-to-action button work for now; focus current efforts on INVARIANT-related features and messaging.",
-    "User provided canonical INVARIANT article source content describing the Quad-Core architecture (VAR/TRUTH/ACE/FLUIDINTEL), MetaCore out-of-band layer, and a strict JSON communication protocol; this content should be used as the basis for a public-facing INVARIANT architecture article.",
-    "Adopt a staged publishing workflow: generate the 3 article contents first for user to save/approve, then implement/fix the Article Detail page and embed each article iteratively (one-by-one) with user review."
+    "Articles feature should persist generated articles to the system’s storage/back end and the Articles page should fetch and render them on load (with proper error handling)."
   ],
   "known_issues": [
-    "User reports they cannot find/see the Articles section/content in the current build (investigate articles routing/visibility/navigation).",
-    "Articles are still missing on the public Articles section (\"/articles\") after the latest deployment (issue persists).",
-    "After deployment (v8), Articles are still missing/not visible on the public site (issue persists).",
-    "User reports an error on the Article page (needs investigation: article detail route/rendering).",
-    "Public Article Detail page is still erroring (user reports issue persists); user provided 3 reference URLs on proqruit.com for expected article content/structure.",
-    "User reports a serious issue with the Article page; requests to first generate the 3 articles, then rebuild/fix the article page and embed each article one-by-one with their guidance.",
-    "Public-facing LinkedIn contact link needs to be updated to: https://www.linkedin.com/company/proqruit (currently incorrect/hardcoded elsewhere).",
-    "Public contact email is still not updated; should be joseph@proqruit.com (user reports persists)."
+    "Articles page does not load (shows an error) and has never displayed any articles despite articles being generated previously."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-create-a-public-facing-blog-website-that-presents-the-user-s-recruitment-startup-work-and-ai-governance-research-constraint-geometry-with-a-homepage-an-articles-index-page-an-article-detail-page-and-an-about-page",
-      "title": "Create a public-facing blog website that presents the user’s recruitment startup work and AI governance research (constraint geometry) with: a homepage, an articles index page, an article detail page, and an about page.",
+      "id": "feature-fix-the-public-articles-index-page-so-it-reliably-loads-without-throwing-an-error-and-show-a-user-friendly-error-state-that-includes-actionable-details-while-keeping-the-page-layout-intact",
+      "title": "Fix the public Articles index page so it reliably loads without throwing an error, and show a user-friendly error state that includes actionable details (while keeping the page layout intact).",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-blog-content-management-with-internet-identity-authentication-so-only-the-authenticated-owner-admin-can-create-edit-publish-unpublish-and-delete-articles",
-      "title": "Implement blog content management with Internet Identity authentication so only the authenticated owner/admin can create, edit, publish/unpublish, and delete articles.",
+      "id": "feature-fix-the-articles-data-flow-so-published-articles-returned-from-the-canister-are-correctly-parsed-and-rendered-in-the-articles-list-and-article-cards-ids-timestamps-tags-and-slugs",
+      "title": "Fix the Articles data flow so published articles returned from the canister are correctly parsed and rendered in the Articles list and article cards (IDs, timestamps, tags, and slugs).",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-admin-dashboard-ui-with-an-article-editor-that-supports-writing-and-previewing-article-content-in-markdown-and-editing-metadata-fields-title-slug-summary-excerpt-tags-publish-status-created-updated-timestamps",
-      "title": "Add an admin dashboard UI with an article editor that supports writing and previewing article content in Markdown, and editing metadata fields (title, slug, summary/excerpt, tags, publish status, created/updated timestamps).",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-basic-discoverability-features-on-the-public-articles-index-client-side-search-by-title-summary-and-filter-by-tag-with-pagination-or-incremental-loading-if-the-list-is-long",
-      "title": "Add basic discoverability features on the public articles index: client-side search by title/summary and filter by tag, with pagination or incremental loading if the list is long.",
+      "id": "feature-provide-an-admin-visible-way-in-the-ui-to-re-publish-the-built-in-article-templates-into-the-canister-so-the-public-articles-page-can-display-real-published-articles-after-a-fresh-deployment",
+      "title": "Provide an admin-visible way in the UI to (re)publish the built-in article templates into the canister, so the public Articles page can display real published articles after a fresh deployment.",
       "reqIds": [
         "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-a-coherent-visual-theme-across-the-site-typography-spacing-components-and-color-palette-suited-to-a-research-driven-recruitment-ai-governance-blog-avoid-blue-purple-as-primary-brand-colors",
-      "title": "Apply a coherent visual theme across the site (typography, spacing, components, and color palette) suited to a research-driven recruitment + AI governance blog; avoid blue/purple as primary brand colors.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-and-include-required-static-brand-images-and-wire-them-into-the-frontend-as-static-assets-under-frontend-public-assets-generated-do-not-serve-them-via-the-backend",
-      "title": "Generate and include required static brand images, and wire them into the frontend as static assets under frontend/public/assets/generated (do not serve them via the backend).",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-admin-dashboard-to-list-and-manage-all-articles-including-drafts-rather-than-only-published-articles",
-      "title": "Update the admin dashboard to list and manage all articles (including drafts), rather than only published articles.",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-article-editor-page-to-load-the-article-being-edited-directly-from-the-backend-by-id-so-drafts-can-be-edited-and-to-validate-slug-uniqueness-against-the-full-admin-list-when-creating-new-articles",
-      "title": "Update the article editor page to load the article being edited directly from the backend by id (so drafts can be edited), and to validate slug uniqueness against the full admin list when creating new articles.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-completely-redesign-the-public-homepage-to-reflect-proqruit-as-an-ai-integrated-recruitment-firm-where-invariant-acts-as-the-digital-4th-partner-emphasizing-data-analysis-pattern-analysis-and-cross-verification-with-real-time-data-as-the-basis-for-decisions",
-      "title": "Completely redesign the public homepage to reflect ProQruit as an AI‑integrated recruitment firm where INVARIANT acts as the digital “4th partner”, emphasizing data analysis, pattern analysis, and cross‑verification with real‑time data as the basis for decisions.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-distinct-homepage-pathways-for-the-two-primary-audiences-candidates-and-clients-each-with-clear-calls-to-action-that-route-to-existing-pages-e-g-articles-and-about-without-introducing-new-routes",
-      "title": "Add distinct homepage pathways for the two primary audiences—Candidates and Clients—each with clear calls-to-action that route to existing pages (e.g., Articles and About) without introducing new routes.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-global-site-header-branding-in-the-main-layout-to-match-the-new-proqruit-invariant-identity-logo-alt-text-and-brand-name-text-keeping-existing-navigation-links-and-admin-visibility-behavior-intact",
-      "title": "Update the global site header branding in the main layout to match the new ProQruit + INVARIANT identity (logo alt text and brand name text), keeping existing navigation links and admin visibility behavior intact.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-revise-homepage-visual-storytelling-by-incorporating-new-static-brand-imagery-consistent-with-the-proqruit-invariant-concept-ai-partner-recruitment-matching-trustworthy-analysis-replacing-the-current-research-visualization-hero-image-usage",
-      "title": "Revise homepage visual storytelling by incorporating new static brand imagery consistent with the ProQruit + INVARIANT concept (AI partner, recruitment matching, trustworthy analysis), replacing the current research visualization hero image usage.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-small-unobtrusive-external-link-or-button-labeled-in-english-e-g-proqruit-com-that-navigates-the-user-to-https-proqruit-com-from-the-site-s-global-navigation-ui-so-it-is-accessible-across-pages-the-link-must-open-in-a-new-tab-and-use-safe-external-link-attributes",
-      "title": "Add a small, unobtrusive external link or button labeled in English (e.g., \"ProQruit.com\") that navigates the user to https://proqruit.com from the site’s global navigation UI (so it is accessible across pages). The link must open in a new tab and use safe external-link attributes.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-and-publish-three-new-long-form-articles-in-the-website-s-articles-section-expanding-the-previously-drafted-topics-into-a-non-traditional-more-distinctive-structure-e-g-quick-scan-field-notes-decision-checklist-playbook-signals-metrics-written-in-english",
-      "title": "Create and publish three new long-form Articles in the website’s Articles section, expanding the previously drafted topics into a non-traditional, more distinctive structure (e.g., “Quick Scan”, “Field Notes”, “Decision Checklist”, “Playbook”, “Signals & Metrics”), written in English.",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-one-optimal-image-per-article-as-a-static-asset-and-embed-it-into-the-article-content-using-markdown-image-syntax-so-it-renders-on-the-article-detail-page",
-      "title": "Add one “optimal” image per article as a static asset and embed it into the article content using Markdown image syntax so it renders on the Article Detail page.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-custom-markdown-renderer-to-support-markdown-images-using-the-syntax-alt-url-rendering-an-img-with-sensible-responsive-styling",
-      "title": "Update the custom Markdown renderer to support Markdown images using the syntax ![alt](url), rendering an <img> with sensible responsive styling.",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-article-card-excerpts-on-the-articles-index-so-embedded-markdown-image-syntax-and-links-do-not-pollute-the-excerpt-text",
-      "title": "Improve article card excerpts on the Articles index so embedded Markdown image syntax and links do not pollute the excerpt text.",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-investigate-and-fix-why-the-public-articles-page-route-articles-shows-no-articles-ensuring-that-published-articles-are-actually-available-and-rendered-for-non-admin-anonymous-visitors",
-      "title": "Investigate and fix why the public Articles page (route \"/articles\") shows no articles, ensuring that published articles are actually available and rendered for non-admin/anonymous visitors.",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-public-contact-links-for-an-email-address-and-a-linkedin-profile-and-attach-them-to-the-ui-so-visitors-can-reach-out-at-minimum-on-the-about-page-optionally-also-in-the-global-footer-use-english-labels-and-make-the-links-functional-mailto-for-email-external-link-for-linkedin",
-      "title": "Add public contact links for an email address and a LinkedIn profile, and attach them to the UI so visitors can reach out (at minimum on the About page; optionally also in the global footer). Use English labels and make the links functional (mailto for email, external link for LinkedIn).",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-public-contact-links-to-use-the-correct-email-address-and-linkedin-profile-company-url-replacing-the-currently-hardcoded-values-wherever-they-appear-at-minimum-about-page-and-global-footer-ensure-all-user-facing-labels-remain-in-english-and-the-links-remain-functional-mailto-for-email-external-link-for-linkedin-with-safe-attributes",
-      "title": "Update the public contact links to use the correct email address and LinkedIn profile/company URL, replacing the currently hardcoded values wherever they appear (at minimum: About page and global footer). Ensure all user-facing labels remain in English and the links remain functional (mailto for email, external link for LinkedIn with safe attributes).",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-root-cause-of-published-articles-not-appearing-on-the-public-articles-index-route-articles-for-anonymous-non-admin-visitors-by-ensuring-article-data-persists-across-deployments-upgrades-and-that-listpublishedarticles-returns-published-articles-reliably-after-redeploy",
-      "title": "Fix the root cause of published articles not appearing on the public Articles index (route \"/articles\") for anonymous/non-admin visitors by ensuring article data persists across deployments/upgrades and that `listPublishedArticles()` returns published articles reliably after redeploy.",
-      "reqIds": [
-        "REQ-24"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-admin-verifiable-diagnostics-in-the-ui-for-the-public-articles-index-to-distinguish-between-a-truly-no-published-articles-and-b-a-fetch-actor-query-failure-without-exposing-admin-only-data-or-requiring-authentication-to-view-published-articles",
-      "title": "Add admin-verifiable diagnostics in the UI for the public Articles index to distinguish between (a) truly no published articles and (b) a fetch/actor/query failure, without exposing admin-only data or requiring authentication to view published articles.",
-      "reqIds": [
-        "REQ-25"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-admin-only-bulk-action-in-the-admin-dashboard-to-recreate-create-if-missing-update-if-existing-and-publish-all-3-default-articles-defined-in-frontend-src-content-articletemplates-ts-so-the-public-articles-index-route-articles-is-no-longer-empty",
-      "title": "Add an admin-only bulk action in the Admin Dashboard to recreate (create-if-missing, update-if-existing) and publish all 3 default articles defined in `frontend/src/content/articleTemplates.ts`, so the public Articles index (route `/articles`) is no longer empty.",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-bulk-recreate-publish-action-provides-clear-english-success-and-error-feedback-in-the-ui-and-refreshes-any-affected-react-query-caches-so-both-the-admin-dashboard-and-public-articles-page-reflect-the-recreated-content-immediately",
-      "title": "Ensure the bulk recreate/publish action provides clear English success and error feedback in the UI, and refreshes any affected React Query caches so both the Admin Dashboard and public Articles page reflect the recreated content immediately.",
-      "reqIds": [
-        "REQ-27"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-root-cause-of-articles-still-being-missing-on-the-public-articles-index-route-articles-after-deployment-ensuring-that-at-least-one-published-article-is-reliably-returned-by-listpublishedarticles-and-rendered-for-anonymous-logged-out-visitors",
-      "title": "Fix the root cause of Articles still being missing on the public Articles index (route \"/articles\") after deployment, ensuring that at least one published article is reliably returned by `listPublishedArticles()` and rendered for anonymous (logged-out) visitors.",
-      "reqIds": [
-        "REQ-28"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-change-the-global-navigation-proqruit-com-item-to-be-presented-as-a-clear-button-style-call-to-action-in-both-desktop-and-mobile-menus-while-keeping-its-behavior-open-https-proqruit-com-in-a-new-tab-with-safe-external-link-handling-and-english-label-text",
-      "title": "Change the global navigation \"ProQruit.com\" item to be presented as a clear button-style call-to-action in both desktop and mobile menus while keeping its behavior: open https://proqruit.com in a new tab with safe external-link handling and English label text.",
-      "reqIds": [
-        "REQ-29"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-refine-the-visual-styling-of-the-global-navigation-proqruit-com-call-to-action-button-in-both-desktop-and-mobile-navigation-in-frontend-src-components-layout-sitelayout-tsx-improving-polish-spacing-typography-hover-active-focus-states-and-icon-alignment-while-keeping-its-current-behavior-unchanged-opens-https-proqruit-com-in-a-new-tab-with-safe-external-link-attributes-and-keeping-the-label-text-in-english",
-      "title": "Refine the visual styling of the global navigation \"ProQruit.com\" call-to-action button in both desktop and mobile navigation in `frontend/src/components/layout/SiteLayout.tsx`, improving polish (spacing, typography, hover/active/focus states, and icon alignment) while keeping its current behavior unchanged (opens https://proqruit.com in a new tab with safe external-link attributes) and keeping the label text in English.",
-      "reqIds": [
-        "REQ-30"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-remove-the-global-navigation-external-link-button-that-navigates-to-https-proqruit-com-proqruit-com-from-both-the-desktop-and-mobile-menus-in-frontend-src-components-layout-sitelayout-tsx-leaving-the-rest-of-the-navigation-articles-about-admin-and-auth-behavior-unchanged",
-      "title": "Remove the global navigation external link/button that navigates to https://proqruit.com (\"ProQruit.com\") from both the desktop and mobile menus in `frontend/src/components/layout/SiteLayout.tsx`, leaving the rest of the navigation (Articles/About/Admin) and auth behavior unchanged.",
-      "reqIds": [
-        "REQ-31"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-global-header-branding-in-frontend-src-components-layout-sitelayout-tsx-to-focus-on-invariant-primary-brand-text-and-accessible-alt-text-rather-than-proqruit-keep-routing-behavior-clicking-brand-returns-to-unchanged",
-      "title": "Update global header branding in `frontend/src/components/layout/SiteLayout.tsx` to focus on INVARIANT (primary brand text and accessible alt text), rather than ProQruit; keep routing behavior (clicking brand returns to \"/\") unchanged.",
-      "reqIds": [
-        "REQ-32"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-revise-homepage-user-facing-copy-in-frontend-src-pages-homepage-tsx-to-be-invariant-first-remove-or-de-emphasize-proqruit-mentions-while-preserving-the-existing-page-structure-sections-and-keeping-all-text-in-english",
-      "title": "Revise homepage user-facing copy in `frontend/src/pages/HomePage.tsx` to be INVARIANT-first (remove or de-emphasize ProQruit mentions) while preserving the existing page structure/sections and keeping all text in English.",
-      "reqIds": [
-        "REQ-33"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-investigate-and-fix-the-error-occurring-on-the-public-article-detail-page-route-articles-slug-so-that-published-articles-reliably-render-for-anonymous-logged-out-visitors",
-      "title": "Investigate and fix the error occurring on the public Article Detail page route \"/articles/$slug\" so that published articles reliably render for anonymous (logged-out) visitors.",
-      "reqIds": [
-        "REQ-34",
-        "REQ-52"
-      ],
-      "version": 2
-    },
-    {
-      "id": "feature-harden-the-article-detail-page-timestamp-and-markdown-rendering-code-paths-to-prevent-runtime-crashes-due-to-unexpected-data-types-or-parsing-edge-cases",
-      "title": "Harden the Article Detail page timestamp and markdown rendering code paths to prevent runtime crashes due to unexpected data types or parsing edge cases.",
-      "reqIds": [
-        "REQ-35"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-new-invariant-brand-logo-assets-as-static-images-under-frontend-public-assets-generated-including-a-square-primary-logo-suitable-for-header-avatar-usage-and-a-matching-favicon",
-      "title": "Generate new INVARIANT brand logo assets as static images under `frontend/public/assets/generated`, including a square primary logo suitable for header/avatar usage and a matching favicon.",
-      "reqIds": [
-        "REQ-36"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-global-header-branding-to-use-the-new-logo-asset-in-frontend-src-components-layout-sitelayout-tsx-keeping-existing-routing-behavior-clicking-brand-navigates-to-navigation-links-articles-about-admin-visibility-behavior-and-existing-english-alt-text-conventions",
-      "title": "Update the global header branding to use the new logo asset in `frontend/src/components/layout/SiteLayout.tsx`, keeping existing routing behavior (clicking brand navigates to \"/\"), navigation links (Articles/About/Admin visibility behavior), and existing English alt text conventions.",
-      "reqIds": [
-        "REQ-37"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-homepage-to-use-the-new-logo-asset-wherever-the-old-invariant-avatar-image-is-displayed-currently-the-floating-card-avatar-in-frontend-src-pages-homepage-tsx",
-      "title": "Update the homepage to use the new logo asset wherever the old INVARIANT avatar image is displayed (currently the floating card avatar in `frontend/src/pages/HomePage.tsx`).",
-      "reqIds": [
-        "REQ-38"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-site-favicon-in-frontend-index-html-to-use-the-newly-generated-favicon-asset-replacing-the-current-assets-generated-favicon-constraint-dim-64x64-png",
-      "title": "Update the site favicon in `frontend/index.html` to use the newly generated favicon asset, replacing the current `/assets/generated/favicon-constraint.dim_64x64.png`.",
-      "reqIds": [
-        "REQ-39"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-updated-invariant-brand-mark-images-that-are-more-tech-oriented-and-visually-depict-convergence-e-g-merging-lines-nodes-paths-into-a-single-stable-form-while-keeping-the-design-minimal-and-readable-at-small-sizes",
-      "title": "Generate updated INVARIANT brand mark images that are more tech-oriented and visually depict \"convergence\" (e.g., merging lines/nodes/paths into a single stable form), while keeping the design minimal and readable at small sizes.",
-      "reqIds": [
-        "REQ-40"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-frontend-to-use-the-new-convergence-logo-assets-everywhere-the-current-invariant-logo-and-favicon-are-referenced-header-logo-homepage-avatar-and-html-favicon-without-changing-routing-or-navigation-behavior",
-      "title": "Update the frontend to use the new convergence logo assets everywhere the current INVARIANT logo and favicon are referenced (header logo, homepage avatar, and HTML favicon), without changing routing or navigation behavior.",
-      "reqIds": [
-        "REQ-41"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-investigate-and-fix-the-recurring-runtime-error-on-the-public-article-detail-page-route-articles-slug-so-published-articles-reliably-render-for-anonymous-logged-out-visitors",
-      "title": "Investigate and fix the recurring runtime error on the public Article Detail page (route \"/articles/$slug\") so published articles reliably render for anonymous (logged-out) visitors.",
-      "reqIds": [
-        "REQ-42"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-harden-admin-dashboard-timestamp-rendering-to-avoid-incorrect-bigint-number-conversion-and-prevent-potential-runtime-errors-when-listing-articles-in-the-admin-dashboard",
-      "title": "Harden admin dashboard timestamp rendering to avoid incorrect bigint/number conversion and prevent potential runtime errors when listing articles in the Admin Dashboard.",
-      "reqIds": [
-        "REQ-43"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-new-long-form-article-template-explaining-the-invariant-quad-core-cognitive-architecture-metacore-layer-using-the-user-provided-system-status-report-content-as-the-source-material-written-in-english",
-      "title": "Add a new long-form Article template explaining the INVARIANT Quad-Core cognitive architecture + MetaCore layer, using the user-provided \"SYSTEM STATUS REPORT\" content as the source material, written in English.",
-      "reqIds": [
-        "REQ-44"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-existing-admin-dashboard-bulk-action-recreate-publish-default-articles-to-also-recreate-update-publish-the-new-invariant-architecture-article-template-in-addition-to-the-existing-default-templates",
-      "title": "Update the existing Admin Dashboard bulk action \"Recreate & Publish Default Articles\" to also recreate/update/publish the new INVARIANT architecture article template (in addition to the existing default templates).",
-      "reqIds": [
-        "REQ-45"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-use-the-provided-proqruit-reference-article-urls-as-editorial-references-when-shaping-recruitment-related-article-content-structure-so-the-site-s-articles-better-match-proqruit-s-public-writing-style",
-      "title": "Use the provided ProQruit reference article URLs as editorial references when shaping recruitment-related article content/structure so the site’s articles better match ProQruit’s public writing style.",
-      "reqIds": [
-        "REQ-46"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-admin-only-workflow-to-recreate-update-publish-the-default-article-templates-one-by-one-instead-of-only-the-existing-bulk-action-so-the-admin-can-embed-import-each-article-sequentially-with-explicit-confirmation-per-article",
-      "title": "Add an admin-only workflow to recreate/update/publish the default article templates one-by-one (instead of only the existing bulk action), so the admin can embed/import each article sequentially with explicit confirmation per article.",
-      "reqIds": [
-        "REQ-47"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-expose-the-one-by-one-template-publish-workflow-in-the-admin-dashboard-ui-with-clear-english-labels-and-per-template-controls-while-keeping-the-existing-recreate-publish-default-articles-bulk-button-unchanged",
-      "title": "Expose the one-by-one template publish workflow in the Admin Dashboard UI with clear English labels and per-template controls, while keeping the existing \"Recreate & Publish Default Articles\" bulk button unchanged.",
-      "reqIds": [
-        "REQ-48"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-article-editor-template-loading-flow-supports-the-step-by-step-workflow-by-making-it-easy-for-the-admin-to-load-a-template-save-it-as-a-draft-and-then-publish-it-with-clear-english-guidance-when-trying-to-publish-before-saving",
-      "title": "Ensure the Article Editor template-loading flow supports the step-by-step workflow by making it easy for the admin to load a template, save it as a draft, and then publish it, with clear English guidance when trying to publish before saving.",
-      "reqIds": [
-        "REQ-49"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-centralized-public-linkedin-contact-url-to-exactly-https-www-linkedin-com-company-proqruit-in-frontend-src-config-publiccontact-ts-so-all-places-that-reference-public-contact-linkedin-including-the-about-page-and-global-footer-link-to-the-correct-linkedin-company-page",
-      "title": "Update the centralized public LinkedIn contact URL to exactly `https://www.linkedin.com/company/proqruit` in `frontend/src/config/publicContact.ts`, so all places that reference `PUBLIC_CONTACT.linkedin` (including the About page and global footer) link to the correct LinkedIn company page.",
-      "reqIds": [
-        "REQ-50"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-centralized-public-contact-email-configuration-to-joseph-proqruit-com-and-ensure-all-public-ui-mailto-links-use-this-updated-value-wherever-public-contact-email-is-referenced-at-minimum-about-page-and-global-footer",
-      "title": "Update the centralized public contact email configuration to `joseph@proqruit.com` and ensure all public UI mailto links use this updated value wherever `PUBLIC_CONTACT.email` is referenced (at minimum: About page and global footer).",
-      "reqIds": [
-        "REQ-51"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-backend-query-method-that-returns-an-optional-article-for-public-slug-lookups-no-traps-for-not-found-unpublished-and-update-the-frontend-article-detail-page-data-fetching-to-use-this-safer-api",
-      "title": "Add a backend query method that returns an optional article for public slug lookups (no traps for not-found/unpublished), and update the frontend Article Detail page data-fetching to use this safer API.",
-      "reqIds": [
-        "REQ-53"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-harden-the-frontend-article-detail-rendering-path-against-unexpected-backend-data-shapes-by-ensuring-markdown-rendering-and-date-rendering-do-not-throw-even-if-fields-are-missing-or-not-of-the-expected-type",
-      "title": "Harden the frontend Article Detail rendering path against unexpected backend data shapes by ensuring markdown rendering and date rendering do not throw even if fields are missing or not of the expected type.",
-      "reqIds": [
-        "REQ-54"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-new-long-form-article-english-by-adding-a-new-entry-to-frontend-src-content-articletemplates-ts-so-it-can-be-loaded-from-the-admin-article-editor-start-from-a-template-dropdown-and-then-saved-published-through-the-existing-admin-workflow",
-      "title": "Create a new long-form article (English) by adding a new entry to `frontend/src/content/articleTemplates.ts` so it can be loaded from the Admin Article Editor “Start from a Template” dropdown and then saved/published through the existing admin workflow.",
-      "reqIds": [
-        "REQ-55"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-created-article-can-be-published-and-appears-publicly-after-an-admin-saves-and-publishes-an-article-created-from-the-new-template-it-must-show-on-the-public-articles-index-articles-and-the-article-detail-page-articles-slug-must-render-successfully-for-anonymous-visitors",
-      "title": "Ensure the created article can be published and appears publicly: after an admin saves and publishes an article created from the new template, it must show on the public Articles index (`/articles`) and the article detail page (`/articles/$slug`) must render successfully for anonymous visitors.",
-      "reqIds": [
-        "REQ-56"
       ],
       "version": 1
     }
@@ -443,130 +38,28 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Create a blog website for publishing articles and studies about the recruitment startup and AI governance work (constraint geometry).",
+      "summary": "Fix Articles page: resolve load error and ensure generated articles are persisted and displayed correctly",
       "reqIds": [],
       "status": "pending"
     },
     {
-      "id": "AR-5",
-      "summary": "Persist blog articles in the Motoko backend (single-actor) with stable storage across upgrades, and expose query/update methods needed by the frontend for: listing published articles, fetching by slug/id, searching/filtering by tag, and admin CRUD operations.",
+      "id": "AR-4",
+      "summary": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
       "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Add article management capabilities: authenticated admin can create, edit, publish/unpublish, and delete articles (admin workflow/UI + supporting backend methods as needed).",
-      "reqIds": [
-        "REQ-2",
         "REQ-3"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-6",
-      "summary": "Add admin-only backend query methods that allow an authenticated admin to manage *all* articles (including drafts), without changing public behavior for non-admin users.",
+      "id": "AR-5",
+      "summary": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
       "reqIds": [
-        "REQ-8"
+        "REQ-4"
       ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Enforce slug uniqueness on the backend for article creation (and prevent conflicts across both drafts and published articles).",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Integrate the ProQruit brand + business site context (proqruit.com) into the blog/website design and content direction, positioning ProQruit as an AI-integrated recruitment firm.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Add an AI chatbox on the public website representing INVARIANT (digital 4th partner) for guided interactions (candidates and clients) and to communicate the AI-driven recruitment vision.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Add tiered access control and role-based internal tooling so employees can access INVARIANT capabilities according to their role (data access + actions), supporting internal operations.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Support AI-assisted recruitment workflows focused on candidate-job matching and client-fit discovery using data analysis, pattern analysis, and cross-verification with real-time data (as a product/feature direction for INVARIANT).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "Homepage redesign to reflect the updated ProQruit + INVARIANT vision (AI-powered recruitment, digital 4th partner) with a unique, intent-driven design.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Add a small button or link on the site that takes the user to the main ProQruit website (proqruit.com).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Expand the 3 drafted India-focused articles (Recruitment, Attrition, INVARIANT reducing attrition) into a more unique/non-traditional format, add one optimal image per article, and publish them to the website Articles section.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Add public contact links (email address and LinkedIn profile) to the website (e.g., About page and/or global footer/header) so visitors can reach out.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Update the public contact links to use the correct email address and LinkedIn profile URL/handle (replace the currently configured values).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Refine the styling/visual polish of the global navigation ProQruit.com call-to-action button (desktop + mobile) while keeping its current behavior intact.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Update the website logo (replace existing logo asset and ensure it renders correctly in the global header/branding across pages).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-19",
-      "summary": "Revise the INVARIANT logo/mark to be more tech-oriented and visually depict \"convergence\" (update generated static logo assets accordingly).",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Create a new long-form Article (or whitepaper-style post) explaining the INVARIANT Quad-Core cognitive architecture + MetaCore layer, based on the provided “SYSTEM STATUS REPORT” content.",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-21",
-      "summary": "Create and publish a new article via the admin workflow (generate content, save as draft, then publish so it appears on the public Articles section).",
-      "reqIds": [],
       "status": "pending"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "ProQruit + INVARIANT AI-integrated recruitment website and blog",
+  "projectName": "Fix Articles page load error and persist/display generated articles",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

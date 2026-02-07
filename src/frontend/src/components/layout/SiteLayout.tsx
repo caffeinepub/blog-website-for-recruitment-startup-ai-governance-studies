@@ -19,8 +19,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   const isAuthenticated = !!identity;
 
   const navLinks = [
-    { href: '/articles', label: 'Articles' },
-    { href: '/about', label: 'About' },
+    { href: '/recruitment', label: 'Recruitment' },
+    { href: '/attrition', label: 'Attrition' },
+    { href: '/invariant', label: 'Invariant' },
   ];
 
   if (isAuthenticated && isAdmin) {
@@ -28,20 +29,20 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-black">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/80">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <img
-                src="/assets/generated/invariant-logo-convergence.dim_256x256.png"
+                src="/assets/generated/invariant-logo-convergence-neon.dim_256x256.png"
                 alt="INVARIANT Logo"
                 className="h-10 w-10 object-contain"
               />
               <div className="hidden sm:block">
-                <span className="font-bold text-lg">INVARIANT</span>
+                <span className="font-bold text-lg text-white">INVARIANT</span>
               </div>
             </Link>
 
@@ -50,7 +51,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
               {navLinks.map((link) => (
                 <Link key={link.href} to={link.href}>
                   <Button
-                    variant={currentPath === link.href ? 'secondary' : 'ghost'}
+                    variant={currentPath === link.href ? 'default' : 'ghost'}
                     className="text-sm font-medium"
                   >
                     {link.label}
@@ -64,7 +65,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2 rounded-md hover:bg-accent"
+              className="md:hidden p-2 rounded-md hover:bg-primary/10 text-white"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -74,12 +75,12 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-border/40">
+            <div className="md:hidden py-4 border-t border-primary/20">
               <nav className="flex flex-col space-y-2">
                 {navLinks.map((link) => (
                   <Link key={link.href} to={link.href} onClick={() => setMobileMenuOpen(false)}>
                     <Button
-                      variant={currentPath === link.href ? 'secondary' : 'ghost'}
+                      variant={currentPath === link.href ? 'default' : 'ghost'}
                       className="w-full justify-start text-sm font-medium"
                     >
                       {link.label}
@@ -99,32 +100,32 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <main className="flex-1">{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 bg-muted/30">
+      <footer className="border-t border-primary/20 bg-gray-950">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+            <div className="flex items-center space-x-2 text-sm text-gray-400">
               <span>© 2026. Built with</span>
-              <SiCoffeescript className="h-4 w-4 text-amber-700 dark:text-amber-500" />
+              <SiCoffeescript className="h-4 w-4 text-primary" />
               <span>using</span>
               <a
                 href="https://caffeine.ai"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium hover:text-foreground transition-colors underline"
+                className="font-medium hover:text-primary transition-colors underline"
               >
                 caffeine.ai
               </a>
             </div>
             <div className="flex items-center space-x-6 text-sm">
-              <Link to="/articles" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/articles" className="text-gray-400 hover:text-primary transition-colors">
                 Articles
               </Link>
-              <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+              <Link to="/about" className="text-gray-400 hover:text-primary transition-colors">
                 About
               </Link>
               <a
                 href={`mailto:${PUBLIC_CONTACT.email}`}
-                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                className="text-gray-400 hover:text-primary transition-colors flex items-center gap-1"
                 aria-label="Email"
               >
                 <Mail className="h-4 w-4" />
@@ -133,7 +134,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                 href={PUBLIC_CONTACT.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                className="text-gray-400 hover:text-primary transition-colors flex items-center gap-1"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="h-4 w-4" />

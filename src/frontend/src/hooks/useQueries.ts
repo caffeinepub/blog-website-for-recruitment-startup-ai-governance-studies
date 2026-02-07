@@ -4,6 +4,20 @@ import type { Article, ArticleUpdate, UserProfile } from '../backend';
 import { toast } from 'sonner';
 import { articleTemplates } from '../content/articleTemplates';
 
+// Helper function to normalize article data from backend
+function normalizeArticle(article: Article): Article {
+  return {
+    id: typeof article.id === 'bigint' ? article.id : BigInt(article.id || 0),
+    slug: String(article.slug || ''),
+    title: String(article.title || ''),
+    content: String(article.content || ''),
+    author: article.author ? String(article.author) : undefined,
+    tags: Array.isArray(article.tags) ? article.tags.map(String) : [],
+    published: Boolean(article.published),
+    timestamp: typeof article.timestamp === 'bigint' ? article.timestamp : BigInt(article.timestamp || 0),
+  };
+}
+
 // User Profile Queries
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -58,40 +72,64 @@ export function useIsCallerAdmin() {
 export function useListPublishedArticles() {
   const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<Article[]>({
+  const query = useQuery<Article[]>({
     queryKey: ['publishedArticles'],
     queryFn: async () => {
-      if (!actor) return [];
-      return actor.listPublishedArticles();
+      if (!actor) throw new Error('Actor not available');
+      const articles = await actor.listPublishedArticles();
+      return articles.map(normalizeArticle);
     },
     enabled: !!actor && !actorFetching,
+    retry: 1,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 export function useGetPublicArticleBySlug(slug: string) {
   const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<Article | null>({
+  const query = useQuery<Article | null>({
     queryKey: ['publicArticle', slug],
     queryFn: async () => {
-      if (!actor) return null;
-      return actor.getPublicArticleBySlug(slug);
+      if (!actor) throw new Error('Actor not available');
+      const article = await actor.getPublicArticleBySlug(slug);
+      return article ? normalizeArticle(article) : null;
     },
     enabled: !!actor && !actorFetching && !!slug,
+    retry: 1,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 export function useSearchArticlesByTag(tag: string) {
   const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<Article[]>({
+  const query = useQuery<Article[]>({
     queryKey: ['articlesByTag', tag],
     queryFn: async () => {
-      if (!actor) return [];
-      return actor.searchArticlesByTag(tag);
+      if (!actor) throw new Error('Actor not available');
+      const articles = await actor.searchArticlesByTag(tag);
+      return articles.map(normalizeArticle);
     },
     enabled: !!actor && !actorFetching && !!tag,
+    retry: 1,
   });
+
+  return {
+    ...query,
+    isLoading: actorFetching || query.isLoading,
+    isFetched: !!actor && query.isFetched,
+  };
 }
 
 // Admin Article Queries
@@ -102,7 +140,8 @@ export function useListAllArticlesAdmin() {
     queryKey: ['allArticlesAdmin'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      return actor.listAllArticlesAdmin();
+      const articles = await actor.listAllArticlesAdmin();
+      return articles.map(normalizeArticle);
     },
     enabled: !!actor && !actorFetching,
   });
@@ -116,7 +155,8 @@ export function useGetArticleById(id: string | null) {
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
       if (!id) throw new Error('Article ID is required');
-      return actor.getArticleById(BigInt(id));
+      const article = await actor.getArticleById(BigInt(id));
+      return normalizeArticle(article);
     },
     enabled: !!actor && !actorFetching && !!id,
   });
@@ -147,7 +187,7 @@ export function useCreateArticle() {
       const articles = await actor.listAllArticlesAdmin();
       const newArticle = articles.find((a) => a.slug === slug);
       if (!newArticle) throw new Error('Article created but not found');
-      return newArticle;
+      return normalizeArticle(newArticle);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['allArticlesAdmin'] });

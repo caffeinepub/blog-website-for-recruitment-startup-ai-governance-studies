@@ -1,60 +1,59 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T18:55:48.140Z",
-  "summary": "REQ-55 appears implemented by adding a new ArticleTemplate in `frontend/src/content/articleTemplates.ts` and wiring template loading into the Admin Article Editor. REQ-56 appears largely implemented by adding guest-access public article queries in `backend/main.mo` and updating the public pages/hooks to use them. However, the new template includes a Markdown image referencing an asset that is not shown as added in the diff, so the acceptance criterion about Markdown images rendering correctly cannot be confirmed from the provided changes. Several substantial unrelated changes (auth/profile/admin guard, homepage redesign, branding updates, etc.) were introduced without being requested.",
+  "generatedAt": "2026-02-07T12:15:25.745Z",
+  "summary": "REQ-1 and REQ-2 appear implemented on the frontend via improved loading/error/empty states on ArticlesIndexPage and defensive/normalized article parsing/rendering. Backend public queries were adjusted to allow guest access and listPublishedArticles is sorted by timestamp (newest first). However, stable persistence across upgrades (REQ-3) is not evidenced, and searchArticlesByTag ordering (REQ-4) is not made deterministic. Several unrelated frontend marketing/nav redesign changes appear to have been introduced that were not requested.",
   "missing_requirements": [
     {
-      "id": "REQ-56",
-      "requirement": "If the new article includes Markdown images, they render correctly using the existing Markdown image support (no broken layout).",
-      "reason": "The new template content includes a Markdown image pointing at `/assets/generated/article-recruitment-india.dim_1600x900.png`, but the diff shows no added static asset files, so it is not verifiable that the referenced image exists and will render correctly.",
+      "id": "REQ-3",
+      "requirement": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
+      "reason": "The diff shows in-memory state only (non-stable) for articles/userProfiles/nextArticleId and does not show any stable variables or upgrade hooks (e.g., preupgrade/postupgrade) to persist and restore state.",
       "evidence": [
-        "frontend/src/content/articleTemplates.ts (Markdown image reference)",
-        "File diff summary: Added files: none"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
+      "reason": "While listPublishedArticles is sorted, searchArticlesByTag returns a filtered array without any sorting, so its ordering is not evidenced as deterministic/consistent (e.g., newest first) as required.",
+      "evidence": [
+        "backend/main.mo"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Added user profile management (get/save caller profile) and expanded authorization/admin route guard behavior.",
-      "reason": "Not requested by REQ-55/REQ-56, which only require adding an article template and ensuring publishing/public visibility.",
+      "description": "New 3-page marketing structure and navigation redesign (Recruitment/Attrition/Invariant routes) plus layout/theme/nav changes.",
+      "reason": "Not requested by any REQ; BuildRequest is focused on Articles reliability, parsing/rendering, backend persistence, deterministic public queries, and admin template republish UI.",
       "evidence": [
-        "backend/main.mo (User Profile Management, authorization checks)",
-        "frontend-file-summaries.txt (AdminRouteGuard, ProfileSetupModal, AccessDeniedScreen, LoginButton)"
+        "frontend-file-summaries.txt (frontend/src/App.tsx, frontend/src/components/layout/SiteLayout.tsx, frontend/src/pages/HomePage.tsx)"
       ]
     },
     {
-      "description": "Redesigned homepage and updated site branding/logo and footer attribution/contact icons.",
-      "reason": "Not requested by REQ-55/REQ-56; BuildRequest explicitly focuses on the admin article template workflow and public article visibility.",
+      "description": "Substrate name masking applied broadly across article list/cards and other pages.",
+      "reason": "Not requested; no requirement mentions content masking or redaction behavior.",
       "evidence": [
-        "frontend-file-summaries.txt (SiteLayout branding/logo changes, HomePage completely redesigned)"
+        "frontend/src/components/articles/ArticlesList.tsx",
+        "frontend-file-summaries.txt (ArticleDetailPage.tsx, ArticleEditorPage.tsx)"
       ]
     },
     {
-      "description": "Added/changed Admin dashboard functionality around \"Default Article Templates\" with per-template \"Create/Update & Publish\" buttons and bulk recreate functionality.",
-      "reason": "Not requested; REQ-55 only requires the template to be selectable from the existing Admin Article Editor dropdown.",
+      "description": "About page content/structure changes unrelated to Articles persistence and rendering.",
+      "reason": "Not requested by the BuildRequest requirements/non-goals.",
       "evidence": [
-        "frontend-file-summaries.txt (AdminDashboardPage new template section and bulk recreate)"
-      ]
-    },
-    {
-      "description": "Implemented new backend public endpoints for listing/searching published articles and fetching published articles by slug.",
-      "reason": "Not explicitly requested as new API surface; REQ-56 only requires that published articles appear on existing public pages. This may be an implementation choice beyond the request.",
-      "evidence": [
-        "backend/main.mo (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag)",
-        "frontend/src/hooks/useQueries.ts (useListPublishedArticles, useGetPublicArticleBySlug, useSearchArticlesByTag)"
+        "frontend-file-summaries.txt (frontend/src/pages/AboutPage.tsx)"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.74,
   "changed_files": [
     "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/content/articleTemplates.ts",
+    "frontend/src/components/articles/ArticlesList.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ArticleDetailPage.tsx",
     "frontend/src/pages/ArticlesIndexPage.tsx",
-    "frontend/src/pages/admin/ArticleEditorPage.tsx",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
     "project_state.json"
   ]
 }

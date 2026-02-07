@@ -1,49 +1,72 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add new admin article template and ensure public visibility after publish",
+  "title": "Stabilize Articles page loading and admin republish of default templates",
   "requirements": [
     {
-      "id": "REQ-55",
-      "summary": "Add a new long-form English ArticleTemplate entry so it appears in the Admin Article Editor “Start from a Template” dropdown and loads into the editor correctly.",
+      "id": "REQ-1",
+      "summary": "Make the public Articles index route resilient (no uncaught errors) and render a user-friendly, actionable error state without breaking the page layout.",
       "acceptanceCriteria": [
-        "`frontend/src/content/articleTemplates.ts` includes one new `ArticleTemplate` with a unique `slug`, `title`, `tags`, and non-empty Markdown `content`.",
-        "The Admin Article Editor page template selector lists the new template and successfully loads its title/slug/content/author/tags into the editor when selected.",
-        "All user-facing text inside the new article content is written in English.",
-        "The new template slug does not conflict with any existing template slugs and remains URL-safe (lowercase, hyphenated)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/content/articleTemplates.ts",
-          "operation": "modify",
-          "description": "Add one new `ArticleTemplate` with a unique, URL-safe lowercase-hyphenated `slug`, English `title`, `author`, `tags`, and substantial non-empty Markdown `content`. If including a Markdown image, reference an existing static asset path already used by other templates (e.g., an existing file under frontend/public/assets/generated)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-56",
-      "summary": "Ensure an article created from the new template can be saved, published, and then appears for anonymous visitors on /articles and /articles/$slug with correct Markdown rendering (including images).",
-      "acceptanceCriteria": [
-        "Admin can: load the new template, click “Save” to create the article, then toggle publish to “Published” without errors.",
-        "As an anonymous (logged-out) visitor, `/articles` lists the newly published article in the results.",
-        "As an anonymous (logged-out) visitor, navigating to `/articles/<new-template-slug>` renders the article title and Markdown content without runtime errors.",
-        "If the new article includes Markdown images, they render correctly using the existing Markdown image support (no broken layout)."
+        "Navigating to the Articles index route renders either a list, an empty state, or a readable error state (no uncaught exceptions).",
+        "If the backend call fails, the UI shows the error message text and does not get stuck in a loading state.",
+        "The page works for both anonymous users and logged-in users."
       ],
       "file_operations": [
         {
           "path": "frontend/src/hooks/useQueries.ts",
           "operation": "modify",
-          "description": "Tighten client-side cache invalidation after publish/unpublish so newly published content reliably appears on the public Articles index and any open article detail view (e.g., ensure relevant public article queries are invalidated/refetched after publish). Keep all user-facing text in English."
+          "description": "Adjust public article React Query hooks (notably useListPublishedArticles) to correctly reflect actor dependency (actorFetching) in isLoading/isFetched and to surface backend call failures as real query errors instead of silently returning empty arrays; ensure behavior supports anonymous (unauthenticated) callers."
         },
         {
           "path": "frontend/src/pages/ArticlesIndexPage.tsx",
           "operation": "modify",
-          "description": "Verify the public Articles index continues to handle logged-out (anonymous) visitors cleanly and refreshes to include newly published articles after an admin publishes (no new routes/pages). Keep all user-facing UI text in English."
+          "description": "Refactor rendering so the page layout (header/search/filter shell) remains intact across loading/empty/error states; replace the early-return error block with an inline error panel that includes actionable details (displayable error text, suggested retry) and a retry action that refetches the published articles query without leaving the page in a perpetual loading state."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Normalize and defensively render published articles so IDs, timestamps, tags, and slugs are parsed safely and cards/detail navigation work reliably.",
+      "acceptanceCriteria": [
+        "When the backend returns one or more published articles, the Articles index page renders them as cards with title, excerpt, tags, and date.",
+        "Clicking an article card navigates to the corresponding article detail route using the article.slug.",
+        "No runtime type errors occur when reading article fields (e.g., BigInt/Nat IDs, timestamps)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Introduce a small client-side normalization layer for Article values returned by backend calls used on the public site (listPublishedArticles/search/getPublicArticleBySlug): coerce/validate id and timestamp to bigint when possible, ensure tags is always a string array, ensure slug/title/content are safe strings, and ensure optional fields (author) do not cause runtime errors."
         },
         {
-          "path": "frontend/src/pages/ArticleDetailPage.tsx",
+          "path": "frontend/src/components/articles/ArticlesList.tsx",
           "operation": "modify",
-          "description": "Verify the public article detail view renders a newly published article by slug for anonymous visitors without runtime errors, and that Markdown content (including any template image) renders via the existing MarkdownRenderer support. Keep all user-facing UI text in English."
+          "description": "Harden the article card rendering against unexpected field shapes (missing/empty slug, non-array tags, absent content/title) and ensure navigation uses a safe, non-empty slug (disable or guard linking when slug is not usable) while preserving the existing card layout."
+        },
+        {
+          "path": "frontend/src/pages/ArticlesIndexPage.tsx",
+          "operation": "modify",
+          "description": "Update filtering/search logic to avoid runtime errors by using normalized/safe string accessors (e.g., title/content/tags) and ensure empty vs filtered-empty states render correctly only after data is fetched."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Ensure the admin UI provides a reliable way to (re)publish default article templates and the public Articles page updates immediately via cache invalidation.",
+      "acceptanceCriteria": [
+        "From the existing admin area, an admin can trigger publishing/recreating the default article templates into the backend without manual canister calls.",
+        "After running the action successfully, the public Articles page shows the newly published template articles without needing a hard refresh (React Query cache invalidation works)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Verify and tighten the template publish/recreate UI states: ensure clear success/failure messaging, prevent double-submits while pending, and (optionally) provide a quick navigation/link back to the public Articles page after success. Verify the authorization component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Confirm the default-template publish/recreate mutations reliably invalidate (and if needed refetch) the public queries that power the Articles index and detail views (publishedArticles, publicArticle, articlesByTag) so newly published templates appear without a hard refresh. Verify the authorization component's usage instructions before implementing."
         }
       ]
     }

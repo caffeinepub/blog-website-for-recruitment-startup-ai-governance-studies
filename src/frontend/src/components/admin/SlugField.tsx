@@ -7,10 +7,11 @@ interface SlugFieldProps {
   value: string;
   onChange: (value: string) => void;
   existingSlugs: string[];
+  currentSlug?: string;
   disabled?: boolean;
 }
 
-export default function SlugField({ value, onChange, existingSlugs, disabled }: SlugFieldProps) {
+export default function SlugField({ value, onChange, existingSlugs, currentSlug, disabled }: SlugFieldProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,14 +27,18 @@ export default function SlugField({ value, onChange, existingSlugs, disabled }: 
       return;
     }
 
-    // Check uniqueness
-    if (existingSlugs.includes(value)) {
+    // Check uniqueness (exclude current slug in edit mode)
+    const slugsToCheck = currentSlug 
+      ? existingSlugs.filter(slug => slug !== currentSlug)
+      : existingSlugs;
+    
+    if (slugsToCheck.includes(value)) {
       setError('This slug is already in use');
       return;
     }
 
     setError(null);
-  }, [value, existingSlugs]);
+  }, [value, existingSlugs, currentSlug]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');

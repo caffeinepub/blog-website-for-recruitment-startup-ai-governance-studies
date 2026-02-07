@@ -3,142 +3,121 @@
 @tailwind utilities;
 
 @layer base {
-    :root {
-        --radius: 0.75rem;
-        
-        /* Modern AI-tech palette - clean, professional, intelligent */
-        --background: 0.99 0.005 240;
-        --foreground: 0.20 0.015 240;
-        
-        --card: 1 0 0;
-        --card-foreground: 0.20 0.015 240;
-        
-        --popover: 1 0 0;
-        --popover-foreground: 0.20 0.015 240;
-        
-        /* Deep blue primary - trust, intelligence, professionalism */
-        --primary: 0.45 0.18 250;
-        --primary-foreground: 0.99 0.005 240;
-        
-        /* Soft neutral secondary */
-        --secondary: 0.95 0.008 240;
-        --secondary-foreground: 0.30 0.015 240;
-        
-        /* Muted grays */
-        --muted: 0.96 0.006 240;
-        --muted-foreground: 0.50 0.012 240;
-        
-        /* Vibrant accent - energy, innovation */
-        --accent: 0.70 0.16 200;
-        --accent-foreground: 0.20 0.015 240;
-        
-        --destructive: 0.55 0.22 15;
-        --destructive-foreground: 0.99 0.005 240;
-        
-        --border: 0.90 0.008 240;
-        --input: 0.90 0.008 240;
-        --ring: 0.45 0.18 250;
-        
-        --chart-1: 0.50 0.16 250;
-        --chart-2: 0.65 0.14 200;
-        --chart-3: 0.70 0.12 180;
-        --chart-4: 0.55 0.18 270;
-        --chart-5: 0.60 0.10 160;
-    }
+  :root {
+    /* Neon Orange + Pitch Black Theme */
+    --background: oklch(0.12 0.02 270); /* Near-black with slight cool tint */
+    --foreground: oklch(0.98 0.01 90); /* Near-white */
 
-    .dark {
-        /* Dark mode - deep, sophisticated tech aesthetic */
-        --background: 0.15 0.015 240;
-        --foreground: 0.95 0.008 240;
-        
-        --card: 0.18 0.015 240;
-        --card-foreground: 0.95 0.008 240;
-        
-        --popover: 0.16 0.015 240;
-        --popover-foreground: 0.95 0.008 240;
-        
-        /* Brighter blue for dark mode visibility */
-        --primary: 0.60 0.20 250;
-        --primary-foreground: 0.15 0.015 240;
-        
-        --secondary: 0.25 0.015 240;
-        --secondary-foreground: 0.95 0.008 240;
-        
-        --muted: 0.28 0.015 240;
-        --muted-foreground: 0.65 0.010 240;
-        
-        --accent: 0.75 0.18 200;
-        --accent-foreground: 0.15 0.015 240;
-        
-        --destructive: 0.60 0.24 15;
-        --destructive-foreground: 0.95 0.008 240;
-        
-        --border: 0.28 0.015 240;
-        --input: 0.28 0.015 240;
-        --ring: 0.60 0.20 250;
-        
-        --chart-1: 0.55 0.18 250;
-        --chart-2: 0.70 0.16 200;
-        --chart-3: 0.75 0.14 180;
-        --chart-4: 0.60 0.20 270;
-        --chart-5: 0.65 0.12 160;
-    }
+    --card: oklch(0.15 0.02 270); /* Slightly lighter than background */
+    --card-foreground: oklch(0.98 0.01 90);
 
-    * {
-        @apply border-border;
-    }
-    
-    body {
-        @apply bg-background text-foreground;
-        font-feature-settings: "rlig" 1, "calt" 1;
-    }
-    
-    /* Enhanced typography for long-form reading */
-    .prose {
-        @apply text-foreground;
-    }
-    
-    .prose h1,
-    .prose h2,
-    .prose h3,
-    .prose h4 {
-        @apply font-bold tracking-tight;
-    }
-    
-    .prose p {
-        @apply leading-relaxed;
-    }
-    
-    .prose a {
-        @apply text-primary hover:text-primary/80 transition-colors;
-    }
-    
-    .prose code {
-        @apply bg-muted text-foreground rounded px-1 py-0.5;
-    }
-    
-    .prose pre {
-        @apply bg-muted rounded-lg p-4 overflow-x-auto;
-    }
-    
-    .prose blockquote {
-        @apply border-l-4 border-primary pl-4 italic text-muted-foreground;
-    }
+    --popover: oklch(0.12 0.02 270);
+    --popover-foreground: oklch(0.98 0.01 90);
+
+    --primary: oklch(0.68 0.22 45); /* Neon orange */
+    --primary-foreground: oklch(0.12 0.02 270); /* Black text on orange */
+
+    --secondary: oklch(0.25 0.03 270); /* Dark gray */
+    --secondary-foreground: oklch(0.98 0.01 90);
+
+    --muted: oklch(0.20 0.02 270); /* Muted dark gray */
+    --muted-foreground: oklch(0.65 0.01 270); /* Light gray text */
+
+    --accent: oklch(0.30 0.03 270); /* Accent dark */
+    --accent-foreground: oklch(0.98 0.01 90);
+
+    --destructive: oklch(0.55 0.25 25); /* Red */
+    --destructive-foreground: oklch(0.98 0.01 90);
+
+    --border: oklch(0.25 0.02 270); /* Dark border */
+    --input: oklch(0.25 0.02 270);
+    --ring: oklch(0.68 0.22 45); /* Neon orange ring */
+
+    --radius: 0.5rem;
+
+    --chart-1: oklch(0.68 0.22 45); /* Neon orange */
+    --chart-2: oklch(0.60 0.18 120); /* Neon green */
+    --chart-3: oklch(0.65 0.20 200); /* Neon blue */
+    --chart-4: oklch(0.70 0.18 300); /* Neon purple */
+    --chart-5: oklch(0.65 0.20 350); /* Neon pink */
+  }
+
+  .dark {
+    /* Dark mode uses same values (dark-first design) */
+    --background: oklch(0.12 0.02 270);
+    --foreground: oklch(0.98 0.01 90);
+
+    --card: oklch(0.15 0.02 270);
+    --card-foreground: oklch(0.98 0.01 90);
+
+    --popover: oklch(0.12 0.02 270);
+    --popover-foreground: oklch(0.98 0.01 90);
+
+    --primary: oklch(0.68 0.22 45);
+    --primary-foreground: oklch(0.12 0.02 270);
+
+    --secondary: oklch(0.25 0.03 270);
+    --secondary-foreground: oklch(0.98 0.01 90);
+
+    --muted: oklch(0.20 0.02 270);
+    --muted-foreground: oklch(0.65 0.01 270);
+
+    --accent: oklch(0.30 0.03 270);
+    --accent-foreground: oklch(0.98 0.01 90);
+
+    --destructive: oklch(0.55 0.25 25);
+    --destructive-foreground: oklch(0.98 0.01 90);
+
+    --border: oklch(0.25 0.02 270);
+    --input: oklch(0.25 0.02 270);
+    --ring: oklch(0.68 0.22 45);
+
+    --chart-1: oklch(0.68 0.22 45);
+    --chart-2: oklch(0.60 0.18 120);
+    --chart-3: oklch(0.65 0.20 200);
+    --chart-4: oklch(0.70 0.18 300);
+    --chart-5: oklch(0.65 0.20 350);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Enhanced typography for long-form content */
+  article {
+    @apply prose prose-lg dark:prose-invert max-w-none;
+    @apply prose-headings:font-bold prose-headings:tracking-tight;
+    @apply prose-p:leading-relaxed prose-p:text-foreground/90;
+    @apply prose-a:text-primary prose-a:no-underline hover:prose-a:underline;
+    @apply prose-strong:text-foreground prose-strong:font-semibold;
+    @apply prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded;
+    @apply prose-pre:bg-muted prose-pre:border prose-pre:border-border;
+    @apply prose-img:rounded-lg prose-img:shadow-lg;
+  }
 }
 
 @layer components {
-    /* ProQruit.com CTA - distinct primary action styling */
-    .proqruit-cta {
-        @apply inline-flex items-center gap-2 px-4 py-2 rounded-md;
-        @apply bg-primary text-primary-foreground;
-        @apply font-semibold text-sm tracking-wide;
-        @apply transition-all duration-200 ease-in-out;
-        @apply hover:bg-primary/90 hover:shadow-md hover:scale-[1.02];
-        @apply active:scale-[0.98] active:shadow-sm;
-        @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
-    }
-    
-    .proqruit-cta-icon {
-        @apply h-4 w-4 flex-shrink-0;
-    }
+  .proqruit-cta {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3;
+    @apply bg-primary text-primary-foreground font-semibold text-base;
+    @apply transition-all duration-200;
+    @apply hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20;
+    @apply active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .proqruit-cta svg {
+    @apply h-5 w-5 transition-transform;
+  }
+
+  .proqruit-cta:hover svg {
+    @apply translate-x-0.5;
+  }
 }

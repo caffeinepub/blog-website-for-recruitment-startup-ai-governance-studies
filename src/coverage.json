@@ -1,54 +1,83 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-06T18:55:48.144Z",
+  "generatedAt": "2026-02-07T12:15:25.747Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 2,
-    "implemented": 2,
+    "total": 5,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-55",
-        "summary": "Create a new long-form article (English) by adding a new entry to `frontend/src/content/articleTemplates.ts` so it can be loaded from the Admin Article Editor “Start from a Template” dropdown and then saved/published through the existing admin workflow.",
+        "id": "REQ-1",
+        "summary": "Fix the public Articles index page so it reliably loads without throwing an error, and show a user-friendly error state that includes actionable details (while keeping the page layout intact).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/content/articleTemplates.ts"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/ArticlesIndexPage.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/content/articleTemplates.ts"
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/pages/ArticlesIndexPage.tsx"
         ]
       },
       {
-        "id": "REQ-56",
-        "summary": "Ensure the created article can be published and appears publicly: after an admin saves and publishes an article created from the new template, it must show on the public Articles index (`/articles`) and the article detail page (`/articles/$slug`) must render successfully for anonymous visitors.",
+        "id": "REQ-2",
+        "summary": "Fix the Articles data flow so published articles returned from the canister are correctly parsed and rendered in the Articles list and article cards (IDs, timestamps, tags, and slugs).",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/ArticlesIndexPage.tsx",
-          "frontend/src/pages/ArticleDetailPage.tsx"
+          "frontend/src/components/articles/ArticlesList.tsx",
+          "frontend/src/pages/ArticlesIndexPage.tsx"
         ],
         "matchedFiles": [
           "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/ArticlesIndexPage.tsx",
-          "frontend/src/pages/ArticleDetailPage.tsx"
+          "frontend/src/components/articles/ArticlesList.tsx",
+          "frontend/src/pages/ArticlesIndexPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Provide an admin-visible way in the UI to (re)publish the built-in article templates into the canister, so the public Articles page can display real published articles after a fresh deployment.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/pages/admin/AdminDashboardPage.tsx",
+          "frontend/src/hooks/useQueries.ts"
         ]
       }
     ]
   },
   "changedFiles": [
     "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/content/articleTemplates.ts",
+    "frontend/src/components/articles/ArticlesList.tsx",
     "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ArticleDetailPage.tsx",
     "frontend/src/pages/ArticlesIndexPage.tsx",
-    "frontend/src/pages/admin/ArticleEditorPage.tsx",
+    "frontend/src/pages/admin/AdminDashboardPage.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",
