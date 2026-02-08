@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useActor } from './useActor';
-import type { Article, ArticleUpdate, UserProfile } from '../backend';
+import type { Article, ArticleUpdate, UserProfile, RestEndpointConfig } from '../backend';
+import { ExternalBlob } from '../backend';
 import { toast } from 'sonner';
 import { articleTemplates } from '../content/articleTemplates';
 
@@ -10,11 +11,13 @@ function normalizeArticle(article: Article): Article {
     id: typeof article.id === 'bigint' ? article.id : BigInt(article.id || 0),
     slug: String(article.slug || ''),
     title: String(article.title || ''),
-    content: String(article.content || ''),
+    textContent: String(article.textContent || ''),
     author: article.author ? String(article.author) : undefined,
     tags: Array.isArray(article.tags) ? article.tags.map(String) : [],
     published: Boolean(article.published),
     timestamp: typeof article.timestamp === 'bigint' ? article.timestamp : BigInt(article.timestamp || 0),
+    pdf: article.pdf,
+    textAttachment: article.textAttachment,
   };
 }
 
@@ -65,6 +68,54 @@ export function useIsCallerAdmin() {
       return actor.isCallerAdmin();
     },
     enabled: !!actor && !actorFetching,
+  });
+}
+
+// REST Endpoint Configuration Queries
+export function useGetRestEndpointStatus() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<{ status: string; configs: RestEndpointConfig | null }>({
+    queryKey: ['restEndpointStatus'],
+    queryFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      const result = await actor.getRestEndpointStatus();
+      return {
+        status: result.status,
+        configs: result.configs || null,
+      };
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+export function useSetRestEndpointConfig() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (config: RestEndpointConfig) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.setRestEndpointConfig(config);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restEndpointStatus'] });
+    },
+  });
+}
+
+export function useClearRestEndpointConfig() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.clearRestEndpointConfig();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['restEndpointStatus'] });
+    },
   });
 }
 
@@ -255,6 +306,79 @@ export function useDeleteArticle() {
   });
 }
 
+// Article Attachment Mutations
+export function useAttachPdfToArticle() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, blob }: { id: bigint; blob: ExternalBlob }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.attachPdfToArticle(id, blob);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['allArticlesAdmin'] });
+      queryClient.invalidateQueries({ queryKey: ['article', variables.id.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['publishedArticles'] });
+      queryClient.invalidateQueries({ queryKey: ['publicArticle'] });
+    },
+  });
+}
+
+export function useAttachTextFileToArticle() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, blob }: { id: bigint; blob: ExternalBlob }) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.attachTextFileToArticle(id, blob);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['allArticlesAdmin'] });
+      queryClient.invalidateQueries({ queryKey: ['article', variables.id.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['publishedArticles'] });
+      queryClient.invalidateQueries({ queryKey: ['publicArticle'] });
+    },
+  });
+}
+
+export function useRemovePdfFromArticle() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.removePdfFromArticle(id);
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['allArticlesAdmin'] });
+      queryClient.invalidateQueries({ queryKey: ['article', id.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['publishedArticles'] });
+      queryClient.invalidateQueries({ queryKey: ['publicArticle'] });
+    },
+  });
+}
+
+export function useRemoveTextFileFromArticle() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error('Actor not available');
+      return actor.removeTextFileFromArticle(id);
+    },
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['allArticlesAdmin'] });
+      queryClient.invalidateQueries({ queryKey: ['article', id.toString()] });
+      queryClient.invalidateQueries({ queryKey: ['publishedArticles'] });
+      queryClient.invalidateQueries({ queryKey: ['publicArticle'] });
+    },
+  });
+}
+
 // Bulk operations
 export function useBulkRecreateDefaultArticles() {
   const { actor } = useActor();
@@ -272,7 +396,7 @@ export function useBulkRecreateDefaultArticles() {
 
         const update: ArticleUpdate = {
           title: template.title,
-          content: template.content,
+          textContent: template.content,
           author: template.author,
           tags: template.tags,
         };
@@ -328,7 +452,7 @@ export function useCreateOrUpdateAndPublishTemplate() {
 
       const update: ArticleUpdate = {
         title,
-        content,
+        textContent: content,
         author,
         tags,
       };

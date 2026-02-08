@@ -1,22 +1,55 @@
-import { useState } from 'react';
-import { useListPublishedArticles } from '../hooks/useQueries';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useListPublishedArticles, useIsCallerAdmin } from '../hooks/useQueries';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import ArticlesList from '../components/articles/ArticlesList';
 import TagFilterBar from '../components/articles/TagFilterBar';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import { getAllTemplateArticles } from '../utils/templateArticles';
+import { classifyBackendError } from '../utils/backendError';
+import { useBackendHealth } from '../hooks/useBackendHealth';
+import FriendlyErrorState from '../components/shared/FriendlyErrorState';
 
 export default function ArticlesIndexPage() {
-  const { data: articles = [], isLoading, error, isFetched, refetch } = useListPublishedArticles();
+  const { data: publishedArticles = [], isLoading, error, isFetched, refetch } = useListPublishedArticles();
+  const { data: isBackendHealthy = true } = useBackendHealth();
+  const { identity } = useInternetIdentity();
+  const { data: isAdmin = false } = useIsCallerAdmin();
+  const navigate = useNavigate();
+  const search = useSearch({ strict: false }) as { topic?: string };
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
+  // Apply topic filter from URL on mount and when search changes
+  useEffect(() => {
+    if (search?.topic) {
+      setSelectedTag(search.topic);
+    }
+  }, [search?.topic]);
+
+  const isAuthenticated = !!identity;
+
+  // Determine which articles to show
+  const hasBackendError = !!error;
+  const shouldUseFallback = hasBackendError || (!isLoading && publishedArticles.length === 0 && !isBackendHealthy);
+  
+  const articles = shouldUseFallback
+    ? getAllTemplateArticles()
+    : publishedArticles;
+
   const allTags = Array.from(new Set(articles.flatMap((article) => article.tags || [])));
+
+  // Highlight the three main topics
+  const mainTopics = ['Recruitment', 'Attrition', 'AI Ethics'];
+  const otherTags = allTags.filter(tag => !mainTopics.includes(tag));
+  const sortedTags = [...mainTopics.filter(t => allTags.includes(t)), ...otherTags];
 
   const filteredArticles = articles.filter((article) => {
     const title = String(article.title || '').toLowerCase();
-    const content = String(article.content || '').toLowerCase();
+    const content = String(article.textContent || '').toLowerCase();
     const tags = Array.isArray(article.tags) ? article.tags : [];
     
     const matchesSearch =
@@ -30,14 +63,27 @@ export default function ArticlesIndexPage() {
     return matchesSearch && matchesTag;
   });
 
+  const handleSelectTag = (tag: string | null) => {
+    setSelectedTag(tag);
+    // Clear topic from URL when manually changing filter
+    if (search?.topic) {
+      navigate({ to: '/articles', search: {} });
+    }
+  };
+
+  // Classify error for user-friendly messaging
+  const classifiedError = error ? classifyBackendError(error) : null;
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="space-y-8">
         {/* Header */}
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight">Articles</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">
+            Beyond the resume
+          </h1>
           <p className="text-lg text-muted-foreground max-w-2xl">
-            Insights on recruitment, attrition, and AI-powered talent intelligence.
+            Exploring fair AI in recruitment and retention. Practical insights, technical deep dives, and thoughts on building transparent, verifiable systems for high-stakes hiring decisions.
           </p>
         </div>
 
@@ -55,65 +101,65 @@ export default function ArticlesIndexPage() {
         </div>
 
         {/* Tag Filter */}
-        {allTags.length > 0 && (
+        {sortedTags.length > 0 && (
           <TagFilterBar
-            tags={allTags}
+            tags={sortedTags}
             selectedTag={selectedTag}
-            onSelectTag={setSelectedTag}
+            onSelectTag={handleSelectTag}
+          />
+        )}
+
+        {/* Error State - Non-blocking, shows above fallback content */}
+        {hasBackendError && (
+          <FriendlyErrorState
+            title="Unable to load latest articles"
+            message={classifiedError?.userMessage || 'Showing template articles instead. Please try again later.'}
+            technicalDetails={classifiedError?.technicalDetails}
+            onRetry={() => refetch()}
+            retryLabel="Try again"
+            variant="default"
           />
         )}
 
         {/* Loading State */}
-        {isLoading && (
+        {isLoading && !shouldUseFallback && (
           <div className="flex items-center justify-center min-h-[40vh]">
             <div className="text-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Loading articles...</p>
+              <p className="text-sm text-muted-foreground">
+                Loading articles...
+              </p>
             </div>
           </div>
         )}
 
-        {/* Error State */}
-        {!isLoading && error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error loading articles</AlertTitle>
-            <AlertDescription className="mt-2 space-y-3">
-              <p className="text-sm">
-                {error instanceof Error ? error.message : 'An unexpected error occurred while loading articles.'}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => refetch()}
-                className="mt-2"
-              >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Try Again
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Empty State - No Articles */}
-        {!isLoading && !error && isFetched && articles.length === 0 && (
-          <div className="text-center py-12 border border-dashed border-border rounded-lg">
-            <p className="text-muted-foreground">No articles published yet. Check back soon!</p>
-          </div>
-        )}
-
-        {/* Empty State - No Filtered Results */}
-        {!isLoading && !error && isFetched && articles.length > 0 && filteredArticles.length === 0 && (
-          <div className="text-center py-12 border border-dashed border-border rounded-lg">
-            <p className="text-muted-foreground">
-              No articles match your search. Try different keywords or clear filters.
-            </p>
-          </div>
-        )}
-
         {/* Articles List */}
-        {!isLoading && !error && filteredArticles.length > 0 && (
-          <ArticlesList articles={filteredArticles} />
+        {!isLoading && (
+          <>
+            {filteredArticles.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">
+                  {searchQuery || selectedTag
+                    ? 'No articles found matching your criteria.'
+                    : 'No articles published yet.'}
+                </p>
+                {(searchQuery || selectedTag) && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedTag(null);
+                    }}
+                    className="mt-4"
+                  >
+                    Clear filters
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <ArticlesList articles={filteredArticles} isAdmin={isAuthenticated && isAdmin} />
+            )}
+          </>
         )}
       </div>
     </div>

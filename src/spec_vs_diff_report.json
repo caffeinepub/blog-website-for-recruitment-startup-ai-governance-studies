@@ -1,59 +1,38 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T12:15:25.745Z",
-  "summary": "REQ-1 and REQ-2 appear implemented on the frontend via improved loading/error/empty states on ArticlesIndexPage and defensive/normalized article parsing/rendering. Backend public queries were adjusted to allow guest access and listPublishedArticles is sorted by timestamp (newest first). However, stable persistence across upgrades (REQ-3) is not evidenced, and searchArticlesByTag ordering (REQ-4) is not made deterministic. Several unrelated frontend marketing/nav redesign changes appear to have been introduced that were not requested.",
+  "generatedAt": "2026-02-08T09:13:18.177Z",
+  "summary": "The diff shows partial work toward transparency (clearing the canvas to transparent on resize), but the provided changes are truncated and do not clearly demonstrate that the render loop avoids painting an opaque background each frame or that the canvas has no CSS background applied. Additionally, unrelated project metadata/summaries were modified without being requested.",
   "missing_requirements": [
     {
-      "id": "REQ-3",
-      "requirement": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
-      "reason": "The diff shows in-memory state only (non-stable) for articles/userProfiles/nextArticleId and does not show any stable variables or upgrade hooks (e.g., preupgrade/postupgrade) to persist and restore state.",
+      "id": "REQ-1",
+      "requirement": "Update the animated background canvas so it renders with a fully transparent background (no black fill), allowing the app’s white background to show through while keeping only the neon nodes/lines visible.",
+      "reason": "The diff snippet only shows `ctx.clearRect(...)` on resize; it does not (in the visible portion) show removal/avoidance of any per-frame background fill (e.g., `fillRect` with black) in the animation loop, nor any explicit removal/override of CSS background on the `<canvas>` element. Because the file is truncated, there is insufficient evidence that the full requirement and acceptance criteria are met (no opaque paint per frame; computed canvas background is transparent; no black flash on initial load/resize).",
       "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
-      "reason": "While listPublishedArticles is sorted, searchArticlesByTag returns a filtered array without any sorting, so its ordering is not evidenced as deterministic/consistent (e.g., newest first) as required.",
-      "evidence": [
-        "backend/main.mo"
+        "frontend/src/components/layout/ProfilesSkillsJobsGraphBackground.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "New 3-page marketing structure and navigation redesign (Recruitment/Attrition/Invariant routes) plus layout/theme/nav changes.",
-      "reason": "Not requested by any REQ; BuildRequest is focused on Articles reliability, parsing/rendering, backend persistence, deterministic public queries, and admin template republish UI.",
+      "description": "Updated/maintained a large repository-wide summary file describing many routes, themes, and components unrelated to making the canvas background transparent.",
+      "reason": "The BuildRequest only asks for making the animated graph canvas background fully transparent; it does not request updating documentation/summary metadata about unrelated pages/routes/theme behavior.",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/App.tsx, frontend/src/components/layout/SiteLayout.tsx, frontend/src/pages/HomePage.tsx)"
+        "frontend-file-summaries.txt (truncated)"
       ]
     },
     {
-      "description": "Substrate name masking applied broadly across article list/cards and other pages.",
-      "reason": "Not requested; no requirement mentions content masking or redaction behavior.",
+      "description": "Modified project tracking/metadata in project_state.json including new_feature_requests (AR-1/AR-2) and status fields.",
+      "reason": "The BuildRequest does not ask for adding or updating project state metadata files; it only specifies a frontend canvas transparency change.",
       "evidence": [
-        "frontend/src/components/articles/ArticlesList.tsx",
-        "frontend-file-summaries.txt (ArticleDetailPage.tsx, ArticleEditorPage.tsx)"
-      ]
-    },
-    {
-      "description": "About page content/structure changes unrelated to Articles persistence and rendering.",
-      "reason": "Not requested by the BuildRequest requirements/non-goals.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/pages/AboutPage.tsx)"
+        "project_state.json"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.62,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/articles/ArticlesList.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ArticlesIndexPage.tsx",
-    "frontend/src/pages/admin/AdminDashboardPage.tsx",
+    "frontend/src/components/layout/ProfilesSkillsJobsGraphBackground.tsx",
     "project_state.json"
   ]
 }

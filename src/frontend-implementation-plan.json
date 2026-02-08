@@ -1,72 +1,22 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Stabilize Articles page loading and admin republish of default templates",
+  "title": "Make animated graph canvas background fully transparent",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Make the public Articles index route resilient (no uncaught errors) and render a user-friendly, actionable error state without breaking the page layout.",
+      "summary": "Ensure the animated graph canvas renders with a fully transparent background (no CSS background and no per-frame opaque fill) across all routes, including initial load and resize.",
       "acceptanceCriteria": [
-        "Navigating to the Articles index route renders either a list, an empty state, or a readable error state (no uncaught exceptions).",
-        "If the backend call fails, the UI shows the error message text and does not get stuck in a loading state.",
-        "The page works for both anonymous users and logged-in users."
+        "On all routes, the area behind the animated graph shows the app background color (white) rather than black.",
+        "The canvas element has no CSS background color applied (computed background is transparent).",
+        "The render loop does not paint an opaque background (no black or other solid fill per frame); only the graph edges/nodes are drawn.",
+        "No visual ‘black flash’ appears on initial load or on resize before the first animation frame completes."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/layout/ProfilesSkillsJobsGraphBackground.tsx",
           "operation": "modify",
-          "description": "Adjust public article React Query hooks (notably useListPublishedArticles) to correctly reflect actor dependency (actorFetching) in isLoading/isFetched and to surface backend call failures as real query errors instead of silently returning empty arrays; ensure behavior supports anonymous (unauthenticated) callers."
-        },
-        {
-          "path": "frontend/src/pages/ArticlesIndexPage.tsx",
-          "operation": "modify",
-          "description": "Refactor rendering so the page layout (header/search/filter shell) remains intact across loading/empty/error states; replace the early-return error block with an inline error panel that includes actionable details (displayable error text, suggested retry) and a retry action that refetches the published articles query without leaving the page in a perpetual loading state."
-        }
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "summary": "Normalize and defensively render published articles so IDs, timestamps, tags, and slugs are parsed safely and cards/detail navigation work reliably.",
-      "acceptanceCriteria": [
-        "When the backend returns one or more published articles, the Articles index page renders them as cards with title, excerpt, tags, and date.",
-        "Clicking an article card navigates to the corresponding article detail route using the article.slug.",
-        "No runtime type errors occur when reading article fields (e.g., BigInt/Nat IDs, timestamps)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Introduce a small client-side normalization layer for Article values returned by backend calls used on the public site (listPublishedArticles/search/getPublicArticleBySlug): coerce/validate id and timestamp to bigint when possible, ensure tags is always a string array, ensure slug/title/content are safe strings, and ensure optional fields (author) do not cause runtime errors."
-        },
-        {
-          "path": "frontend/src/components/articles/ArticlesList.tsx",
-          "operation": "modify",
-          "description": "Harden the article card rendering against unexpected field shapes (missing/empty slug, non-array tags, absent content/title) and ensure navigation uses a safe, non-empty slug (disable or guard linking when slug is not usable) while preserving the existing card layout."
-        },
-        {
-          "path": "frontend/src/pages/ArticlesIndexPage.tsx",
-          "operation": "modify",
-          "description": "Update filtering/search logic to avoid runtime errors by using normalized/safe string accessors (e.g., title/content/tags) and ensure empty vs filtered-empty states render correctly only after data is fetched."
-        }
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "summary": "Ensure the admin UI provides a reliable way to (re)publish default article templates and the public Articles page updates immediately via cache invalidation.",
-      "acceptanceCriteria": [
-        "From the existing admin area, an admin can trigger publishing/recreating the default article templates into the backend without manual canister calls.",
-        "After running the action successfully, the public Articles page shows the newly published template articles without needing a hard refresh (React Query cache invalidation works)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "operation": "modify",
-          "description": "Verify and tighten the template publish/recreate UI states: ensure clear success/failure messaging, prevent double-submits while pending, and (optionally) provide a quick navigation/link back to the public Articles page after success. Verify the authorization component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/hooks/useQueries.ts",
-          "operation": "modify",
-          "description": "Confirm the default-template publish/recreate mutations reliably invalidate (and if needed refetch) the public queries that power the Articles index and detail views (publishedArticles, publicArticle, articlesByTag) so newly published templates appear without a hard refresh. Verify the authorization component's usage instructions before implementing."
+          "description": "Update the canvas element and drawing lifecycle to guarantee transparency: explicitly enforce a transparent canvas background (e.g., Tailwind bg-transparent and/or inline backgroundColor: 'transparent'); ensure the canvas is cleared to transparent immediately after mount and on every resize (clearRect right after resizing) to avoid any initial/resize flash; confirm the render loop does not perform any opaque background fill (remove/avoid any fillRect covering the full canvas if present now or introduced later)."
         }
       ]
     }

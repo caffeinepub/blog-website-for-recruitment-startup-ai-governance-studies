@@ -9,14 +9,23 @@ interface SlugFieldProps {
   existingSlugs: string[];
   currentSlug?: string;
   disabled?: boolean;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
-export default function SlugField({ value, onChange, existingSlugs, currentSlug, disabled }: SlugFieldProps) {
+export default function SlugField({ 
+  value, 
+  onChange, 
+  existingSlugs, 
+  currentSlug, 
+  disabled,
+  onValidationChange 
+}: SlugFieldProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!value) {
       setError(null);
+      onValidationChange?.(false);
       return;
     }
 
@@ -24,6 +33,7 @@ export default function SlugField({ value, onChange, existingSlugs, currentSlug,
     const urlSafeRegex = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
     if (!urlSafeRegex.test(value)) {
       setError('Slug must be lowercase letters, numbers, and hyphens only');
+      onValidationChange?.(false);
       return;
     }
 
@@ -34,11 +44,13 @@ export default function SlugField({ value, onChange, existingSlugs, currentSlug,
     
     if (slugsToCheck.includes(value)) {
       setError('This slug is already in use');
+      onValidationChange?.(false);
       return;
     }
 
     setError(null);
-  }, [value, existingSlugs, currentSlug]);
+    onValidationChange?.(true);
+  }, [value, existingSlugs, currentSlug, onValidationChange]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-');

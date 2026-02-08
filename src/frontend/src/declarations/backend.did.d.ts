@@ -12,27 +12,65 @@ import type { Principal } from '@icp-sdk/core/principal';
 
 export interface Article {
   'id' : bigint,
+  'pdf' : [] | [ExternalBlob],
   'title' : string,
-  'content' : string,
   'published' : boolean,
   'slug' : string,
   'tags' : Array<string>,
   'author' : [] | [string],
   'timestamp' : bigint,
+  'textAttachment' : [] | [ExternalBlob],
+  'textContent' : string,
 }
 export interface ArticleUpdate {
   'title' : string,
-  'content' : string,
   'tags' : Array<string>,
   'author' : [] | [string],
+  'textContent' : string,
+}
+export type ExternalBlob = Uint8Array;
+export interface RestEndpointConfig {
+  'id' : string,
+  'enabled' : boolean,
+  'endpointUrl' : string,
+  'apiKey' : [] | [string],
 }
 export interface UserProfile { 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'attachPdfToArticle' : ActorMethod<[bigint, ExternalBlob], undefined>,
+  'attachTextFileToArticle' : ActorMethod<[bigint, ExternalBlob], undefined>,
+  'clearRestEndpointConfig' : ActorMethod<[], undefined>,
   'createArticle' : ActorMethod<[string, ArticleUpdate], undefined>,
   'deleteArticle' : ActorMethod<[bigint], undefined>,
   'getAllSlugsAdmin' : ActorMethod<[], Array<string>>,
@@ -41,13 +79,20 @@ export interface _SERVICE {
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getPublicArticleBySlug' : ActorMethod<[string], [] | [Article]>,
+  'getRestEndpointStatus' : ActorMethod<
+    [],
+    { 'status' : string, 'configs' : [] | [RestEndpointConfig] }
+  >,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'listAllArticlesAdmin' : ActorMethod<[], Array<Article>>,
   'listPublishedArticles' : ActorMethod<[], Array<Article>>,
   'publishArticle' : ActorMethod<[bigint, boolean], undefined>,
+  'removePdfFromArticle' : ActorMethod<[bigint], undefined>,
+  'removeTextFileFromArticle' : ActorMethod<[bigint], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'searchArticlesByTag' : ActorMethod<[string], Array<Article>>,
+  'setRestEndpointConfig' : ActorMethod<[RestEndpointConfig], undefined>,
   'updateArticle' : ActorMethod<[bigint, ArticleUpdate], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;

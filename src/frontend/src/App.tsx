@@ -2,12 +2,11 @@ import { createRouter, createRoute, createRootRoute, RouterProvider, Outlet } fr
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import SiteLayout from './components/layout/SiteLayout';
-import RecruitmentPage from './pages/RecruitmentPage';
-import AttritionPage from './pages/AttritionPage';
-import InvariantPage from './pages/InvariantPage';
+import HomePage from './pages/HomePage';
 import ArticlesIndexPage from './pages/ArticlesIndexPage';
-import ArticleDetailPage from './pages/ArticleDetailPage';
 import AboutPage from './pages/AboutPage';
+import ArticleDetailPage from './pages/ArticleDetailPage';
+import NewsletterPage from './pages/NewsletterPage';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import ArticleEditorPage from './pages/admin/ArticleEditorPage';
 import AdminRouteGuard from './components/auth/AdminRouteGuard';
@@ -21,48 +20,35 @@ const rootRoute = createRootRoute({
   ),
 });
 
-// Public routes - new 3-page structure
-const indexRoute = createRoute({
+// Public routes - Blog structure
+const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: RecruitmentPage,
+  component: HomePage,
 });
 
-const recruitmentRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/recruitment',
-  component: RecruitmentPage,
-});
-
-const attritionRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/attrition',
-  component: AttritionPage,
-});
-
-const invariantRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/invariant',
-  component: InvariantPage,
-});
-
-// Legacy public routes (still accessible)
 const articlesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/articles',
   component: ArticlesIndexPage,
 });
 
-const articleDetailRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/articles/$slug',
-  component: ArticleDetailPage,
-});
-
 const aboutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/about',
   component: AboutPage,
+});
+
+const newsletterRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/newsletter',
+  component: NewsletterPage,
+});
+
+const articleDetailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/articles/$slug',
+  component: ArticleDetailPage,
 });
 
 // Admin routes (protected)
@@ -97,13 +83,11 @@ const adminEditorEditRoute = createRoute({
 });
 
 const routeTree = rootRoute.addChildren([
-  indexRoute,
-  recruitmentRoute,
-  attritionRoute,
-  invariantRoute,
+  homeRoute,
   articlesRoute,
-  articleDetailRoute,
   aboutRoute,
+  newsletterRoute,
+  articleDetailRoute,
   adminRoute,
   adminEditorNewRoute,
   adminEditorEditRoute,
@@ -119,7 +103,7 @@ declare module '@tanstack/react-router' {
 
 export default function App() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <RouterProvider router={router} />
       <Toaster />
     </ThemeProvider>

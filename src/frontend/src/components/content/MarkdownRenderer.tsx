@@ -1,4 +1,4 @@
-import { maskSubstrateNames } from '@/utils/layerMask';
+import { simplifyUserFacingText } from '@/utils/textTransforms';
 
 interface MarkdownRendererProps {
   content: string;
@@ -14,10 +14,7 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
     return <div className={className}>No content available.</div>;
   }
 
-  // Apply substrate name masking at render time
-  const maskedContent = maskSubstrateNames(safeContent);
-
-  // Simple markdown-to-HTML conversion without external dependencies
+  // Simple markdown-to-HTML conversion with integrated text transformations
   const renderMarkdown = (text: string): string => {
     let html = text;
 
@@ -28,69 +25,92 @@ export default function MarkdownRenderer({ content, className = '' }: MarkdownRe
       .replace(/>/g, '&gt;');
 
     // Headers (must come before other replacements)
-    html = html.replace(/^### (.*$)/gim, '<h3>$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2>$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+    html = html.replace(/^### (.*$)/gim, (match, content) => {
+      return `<h3>${simplifyUserFacingText(content)}</h3>`;
+    });
+    html = html.replace(/^## (.*$)/gim, (match, content) => {
+      return `<h2>${simplifyUserFacingText(content)}</h2>`;
+    });
+    html = html.replace(/^# (.*$)/gim, (match, content) => {
+      return `<h1>${simplifyUserFacingText(content)}</h1>`;
+    });
 
     // Bold
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/__(.+?)__/g, '<strong>$1</strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g, (match, content) => {
+      return `<strong>${simplifyUserFacingText(content)}</strong>`;
+    });
+    html = html.replace(/__(.+?)__/g, (match, content) => {
+      return `<strong>${simplifyUserFacingText(content)}</strong>`;
+    });
 
     // Italic
-    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    html = html.replace(/_(.+?)_/g, '<em>$1</em>');
+    html = html.replace(/\*(.+?)\*/g, (match, content) => {
+      return `<em>${simplifyUserFacingText(content)}</em>`;
+    });
+    html = html.replace(/_(.+?)_/g, (match, content) => {
+      return `<em>${simplifyUserFacingText(content)}</em>`;
+    });
 
-    // Links - mask alt text in the replacement
+    // Links - simplify link text but preserve URLs
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-      const maskedText = maskSubstrateNames(text);
+      const simplifiedText = simplifyUserFacingText(text);
       const isExternal = url.startsWith('http');
       const target = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
-      return `<a href="${url}"${target}>${maskedText}</a>`;
+      return `<a href="${url}"${target}>${simplifiedText}</a>`;
     });
 
-    // Images - mask alt text
+    // Images - simplify alt text but preserve URLs
     html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, url) => {
-      const maskedAlt = maskSubstrateNames(alt);
-      return `<img src="${url}" alt="${maskedAlt}" />`;
+      const simplifiedAlt = simplifyUserFacingText(alt);
+      return `<img src="${url}" alt="${simplifiedAlt}" />`;
     });
 
-    // Code blocks
+    // Code blocks - preserve as-is (no simplification)
     html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
     
-    // Inline code
+    // Inline code - preserve as-is (no simplification)
     html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
 
-    // Lists - unordered
-    html = html.replace(/^\* (.+)$/gim, '<li>$1</li>');
-    html = html.replace(/^- (.+)$/gim, '<li>$1</li>');
+    // Lists - unordered (simplify list items)
+    html = html.replace(/^\* (.+)$/gim, (match, content) => {
+      return `<li>${simplifyUserFacingText(content)}</li>`;
+    });
+    html = html.replace(/^- (.+)$/gim, (match, content) => {
+      return `<li>${simplifyUserFacingText(content)}</li>`;
+    });
     html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
 
-    // Lists - ordered
-    html = html.replace(/^\d+\. (.+)$/gim, '<li>$1</li>');
+    // Lists - ordered (simplify list items)
+    html = html.replace(/^\d+\. (.+)$/gim, (match, content) => {
+      return `<li>${simplifyUserFacingText(content)}</li>`;
+    });
 
-    // Blockquotes
-    html = html.replace(/^> (.+)$/gim, '<blockquote>$1</blockquote>');
+    // Blockquotes (simplify content)
+    html = html.replace(/^> (.+)$/gim, (match, content) => {
+      return `<blockquote>${simplifyUserFacingText(content)}</blockquote>`;
+    });
 
     // Horizontal rules
     html = html.replace(/^---$/gim, '<hr />');
     html = html.replace(/^\*\*\*$/gim, '<hr />');
 
-    // Line breaks - convert double newlines to paragraphs
+    // Line breaks - convert double newlines to paragraphs (simplify paragraph content)
     const paragraphs = html.split(/\n\n+/);
     html = paragraphs
       .map(p => {
         // Don't wrap if already wrapped in a block element
-        if (p.match(/^<(h[1-6]|ul|ol|blockquote|pre|hr)/)) {
+        if (p.match(/^<(h[1-6]|ul|ol|blockquote|pre|hr|code)/)) {
           return p;
         }
-        return `<p>${p.replace(/\n/g, '<br />')}</p>`;
+        const simplified = simplifyUserFacingText(p.replace(/\n/g, '<br />'));
+        return `<p>${simplified}</p>`;
       })
       .join('\n');
 
     return html;
   };
 
-  const htmlContent = renderMarkdown(maskedContent);
+  const htmlContent = renderMarkdown(safeContent);
 
   return (
     <div 

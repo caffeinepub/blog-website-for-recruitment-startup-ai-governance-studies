@@ -4,79 +4,89 @@
 
 @layer base {
   :root {
-    /* Neon Orange + Pitch Black Theme */
-    --background: oklch(0.12 0.02 270); /* Near-black with slight cool tint */
-    --foreground: oklch(0.98 0.01 90); /* Near-white */
-
-    --card: oklch(0.15 0.02 270); /* Slightly lighter than background */
-    --card-foreground: oklch(0.98 0.01 90);
-
-    --popover: oklch(0.12 0.02 270);
-    --popover-foreground: oklch(0.98 0.01 90);
-
-    --primary: oklch(0.68 0.22 45); /* Neon orange */
-    --primary-foreground: oklch(0.12 0.02 270); /* Black text on orange */
-
-    --secondary: oklch(0.25 0.03 270); /* Dark gray */
-    --secondary-foreground: oklch(0.98 0.01 90);
-
-    --muted: oklch(0.20 0.02 270); /* Muted dark gray */
-    --muted-foreground: oklch(0.65 0.01 270); /* Light gray text */
-
-    --accent: oklch(0.30 0.03 270); /* Accent dark */
-    --accent-foreground: oklch(0.98 0.01 90);
-
-    --destructive: oklch(0.55 0.25 25); /* Red */
-    --destructive-foreground: oklch(0.98 0.01 90);
-
-    --border: oklch(0.25 0.02 270); /* Dark border */
-    --input: oklch(0.25 0.02 270);
-    --ring: oklch(0.68 0.22 45); /* Neon orange ring */
-
+    /* White background with dark readable text */
+    --background: oklch(1.0 0 0); /* Pure white */
+    --foreground: oklch(0.20 0 0); /* Dark gray/black text */
+    
+    --card: oklch(0.98 0 0); /* Light gray card surfaces */
+    --card-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --popover: oklch(0.98 0 0);
+    --popover-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --primary: oklch(0.55 0.12 180); /* Sea-foam green (kept for compatibility) */
+    --primary-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --seafoam: oklch(0.60 0.10 175); /* Sea-foam green accent */
+    --seafoam-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --graph-neon: oklch(0.75 0.25 135); /* Bright neon green for graph (distinct from sea-foam) */
+    
+    --secondary: oklch(0.95 0 0);
+    --secondary-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --muted: oklch(0.96 0 0);
+    --muted-foreground: oklch(0.40 0 0); /* Medium gray text */
+    
+    --accent: oklch(0.60 0.10 175); /* Sea-foam accent */
+    --accent-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --destructive: oklch(0.55 0.22 25);
+    --destructive-foreground: oklch(1.0 0 0); /* White text on destructive */
+    
+    --border: oklch(0.85 0 0); /* Light gray borders */
+    --input: oklch(0.95 0 0);
+    --ring: oklch(0.60 0.10 175); /* Sea-foam focus rings */
+    
+    --success: oklch(0.65 0.18 150);
+    --success-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --warning: oklch(0.75 0.15 75);
+    --warning-foreground: oklch(0.20 0 0); /* Dark text */
+    
     --radius: 0.5rem;
-
-    --chart-1: oklch(0.68 0.22 45); /* Neon orange */
-    --chart-2: oklch(0.60 0.18 120); /* Neon green */
-    --chart-3: oklch(0.65 0.20 200); /* Neon blue */
-    --chart-4: oklch(0.70 0.18 300); /* Neon purple */
-    --chart-5: oklch(0.65 0.20 350); /* Neon pink */
   }
 
   .dark {
-    /* Dark mode uses same values (dark-first design) */
-    --background: oklch(0.12 0.02 270);
-    --foreground: oklch(0.98 0.01 90);
-
-    --card: oklch(0.15 0.02 270);
-    --card-foreground: oklch(0.98 0.01 90);
-
-    --popover: oklch(0.12 0.02 270);
-    --popover-foreground: oklch(0.98 0.01 90);
-
-    --primary: oklch(0.68 0.22 45);
-    --primary-foreground: oklch(0.12 0.02 270);
-
-    --secondary: oklch(0.25 0.03 270);
-    --secondary-foreground: oklch(0.98 0.01 90);
-
-    --muted: oklch(0.20 0.02 270);
-    --muted-foreground: oklch(0.65 0.01 270);
-
-    --accent: oklch(0.30 0.03 270);
-    --accent-foreground: oklch(0.98 0.01 90);
-
-    --destructive: oklch(0.55 0.25 25);
-    --destructive-foreground: oklch(0.98 0.01 90);
-
-    --border: oklch(0.25 0.02 270);
-    --input: oklch(0.25 0.02 270);
-    --ring: oklch(0.68 0.22 45);
-
-    --chart-1: oklch(0.68 0.22 45);
-    --chart-2: oklch(0.60 0.18 120);
-    --chart-3: oklch(0.65 0.20 200);
-    --chart-4: oklch(0.70 0.18 300);
-    --chart-5: oklch(0.65 0.20 350);
+    /* Dark mode uses the same light palette with dark text */
+    --background: oklch(1.0 0 0);
+    --foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --card: oklch(0.98 0 0);
+    --card-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --popover: oklch(0.98 0 0);
+    --popover-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --primary: oklch(0.55 0.12 180);
+    --primary-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --seafoam: oklch(0.60 0.10 175);
+    --seafoam-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --graph-neon: oklch(0.75 0.25 135);
+    
+    --secondary: oklch(0.95 0 0);
+    --secondary-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --muted: oklch(0.96 0 0);
+    --muted-foreground: oklch(0.40 0 0); /* Medium gray text */
+    
+    --accent: oklch(0.60 0.10 175);
+    --accent-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --destructive: oklch(0.55 0.22 25);
+    --destructive-foreground: oklch(1.0 0 0); /* White text on destructive */
+    
+    --border: oklch(0.85 0 0);
+    --input: oklch(0.95 0 0);
+    --ring: oklch(0.60 0.10 175);
+    
+    --success: oklch(0.65 0.18 150);
+    --success-foreground: oklch(0.20 0 0); /* Dark text */
+    
+    --warning: oklch(0.75 0.15 75);
+    --warning-foreground: oklch(0.20 0 0); /* Dark text */
   }
 }
 
@@ -84,40 +94,141 @@
   * {
     @apply border-border;
   }
+  
+  html,
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-
-  /* Enhanced typography for long-form content */
-  article {
-    @apply prose prose-lg dark:prose-invert max-w-none;
-    @apply prose-headings:font-bold prose-headings:tracking-tight;
-    @apply prose-p:leading-relaxed prose-p:text-foreground/90;
-    @apply prose-a:text-primary prose-a:no-underline hover:prose-a:underline;
-    @apply prose-strong:text-foreground prose-strong:font-semibold;
-    @apply prose-code:text-primary prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded;
-    @apply prose-pre:bg-muted prose-pre:border prose-pre:border-border;
-    @apply prose-img:rounded-lg prose-img:shadow-lg;
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-@layer components {
-  .proqruit-cta {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-6 py-3;
-    @apply bg-primary text-primary-foreground font-semibold text-base;
+/* Enhanced typography for long-form blog content */
+@layer base {
+  .prose {
+    @apply text-foreground;
+    max-width: 65ch;
+  }
+  
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4,
+  .prose h5,
+  .prose h6 {
+    @apply text-foreground font-bold;
+    scroll-margin-top: 5rem;
+  }
+  
+  .prose h1 {
+    @apply text-4xl mb-6 mt-8;
+  }
+  
+  .prose h2 {
+    @apply text-3xl mb-5 mt-8;
+  }
+  
+  .prose h3 {
+    @apply text-2xl mb-4 mt-6;
+  }
+  
+  .prose p {
+    @apply text-foreground leading-relaxed mb-4;
+  }
+  
+  .prose a {
+    @apply text-foreground underline decoration-foreground/30 hover:decoration-foreground transition-colors;
+  }
+  
+  .prose strong {
+    @apply text-foreground font-semibold;
+  }
+  
+  .prose em {
+    @apply text-foreground italic;
+  }
+  
+  .prose code {
+    @apply bg-muted text-foreground px-1.5 py-0.5 rounded text-sm font-mono;
+  }
+  
+  .prose pre {
+    @apply bg-muted text-foreground p-4 rounded-lg overflow-x-auto mb-4;
+  }
+  
+  .prose pre code {
+    @apply bg-transparent p-0;
+  }
+  
+  .prose ul,
+  .prose ol {
+    @apply text-foreground mb-4 pl-6;
+  }
+  
+  .prose li {
+    @apply mb-2;
+  }
+  
+  .prose blockquote {
+    @apply border-l-4 border-seafoam pl-4 italic text-foreground my-6;
+  }
+  
+  .prose img {
+    @apply rounded-lg my-6;
+  }
+  
+  .prose hr {
+    @apply border-border my-8;
+  }
+}
+
+/* Interactive elements with sea-foam accents */
+@layer utilities {
+  .interactive-element {
     @apply transition-all duration-200;
-    @apply hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20;
-    @apply active:scale-[0.98];
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
-    @apply disabled:pointer-events-none disabled:opacity-50;
   }
-
-  .proqruit-cta svg {
-    @apply h-5 w-5 transition-transform;
+  
+  .interactive-element:hover {
+    @apply scale-[1.02];
   }
+  
+  .interactive-element:active {
+    @apply scale-[0.98];
+  }
+}
 
-  .proqruit-cta:hover svg {
-    @apply translate-x-0.5;
+/* Sea-foam accent utilities */
+@layer utilities {
+  .text-seafoam {
+    color: oklch(0.60 0.10 175);
+  }
+  
+  .bg-seafoam {
+    background-color: oklch(0.60 0.10 175);
+  }
+  
+  .border-seafoam {
+    border-color: oklch(0.60 0.10 175);
+  }
+  
+  .ring-seafoam {
+    --tw-ring-color: oklch(0.60 0.10 175);
   }
 }

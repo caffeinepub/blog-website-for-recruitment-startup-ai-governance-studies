@@ -9,10 +9,13 @@ interface TagFilterBarProps {
 }
 
 export default function TagFilterBar({ tags, selectedTag, onSelectTag }: TagFilterBarProps) {
+  // Highlight main topics
+  const mainTopics = ['Recruitment', 'Attrition', 'AI Ethics'];
+  
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span>Filter by tag:</span>
+        <span>Filter by topic:</span>
         {selectedTag && (
           <Button
             variant="ghost"
@@ -26,16 +29,23 @@ export default function TagFilterBar({ tags, selectedTag, onSelectTag }: TagFilt
         )}
       </div>
       <div className="flex flex-wrap gap-2">
-        {tags.map((tag) => (
-          <Badge
-            key={tag}
-            variant={selectedTag === tag ? 'default' : 'outline'}
-            className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-            onClick={() => onSelectTag(selectedTag === tag ? null : tag)}
-          >
-            {tag}
-          </Badge>
-        ))}
+        {tags.map((tag) => {
+          const isMainTopic = mainTopics.includes(tag);
+          const isSelected = selectedTag === tag;
+          
+          return (
+            <Badge
+              key={tag}
+              variant={isSelected ? 'default' : 'outline'}
+              className={`cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors ${
+                isMainTopic && !isSelected ? 'border-primary/60 font-semibold' : ''
+              }`}
+              onClick={() => onSelectTag(isSelected ? null : tag)}
+            >
+              {tag}
+            </Badge>
+          );
+        })}
       </div>
     </div>
   );

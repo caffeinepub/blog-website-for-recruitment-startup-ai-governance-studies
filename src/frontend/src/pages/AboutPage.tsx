@@ -1,115 +1,176 @@
-import { Mail, Linkedin, Github } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
-import { PUBLIC_CONTACT } from '../config/publicContact';
+import { ArrowRight } from 'lucide-react';
+import { PageFadeIn, InViewFade } from '@/components/marketing/Motion';
+import { SectionNameBox } from '@/components/marketing/SectionNameBox';
+import { Section } from '@/components/marketing/Section';
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-3xl mx-auto space-y-12">
-        {/* Header */}
-        <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">About</h1>
-          <p className="text-xl text-muted-foreground">
-            Bridging AI governance research with practical recruitment innovation.
-          </p>
-        </div>
-
-        {/* Our Mission */}
-        <section className="space-y-4">
-          <h2 className="text-3xl font-bold">Our Mission</h2>
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <p>
-              We're building the future of recruitment while advancing the field of AI governance
-              through constraint geometry frameworks. Our work sits at the intersection of
-              theoretical research and practical application.
-            </p>
-            <p>
-              By applying rigorous governance principles to recruitment technology, we aim to create
-              systems that are not only effective but also ethical, transparent, and aligned with
-              human values.
-            </p>
+    <PageFadeIn>
+      <div className="flex flex-col">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden bg-background border-b border-seafoam">
+          <div className="container relative mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32">
+            <SectionNameBox name="About" />
+            <InViewFade>
+              <div className="max-w-4xl mx-auto text-center space-y-8">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight text-foreground">
+                  About{' '}
+                  <span className="text-foreground">Beyond the resume</span>
+                </h1>
+                <p className="text-xl md:text-2xl text-foreground leading-relaxed">
+                  A blog exploring ethical AI in recruitment and retention
+                </p>
+              </div>
+            </InViewFade>
           </div>
         </section>
 
-        {/* Constraint Geometry in AI Governance */}
-        <section className="space-y-4">
-          <h2 className="text-3xl font-bold">Constraint Geometry in AI Governance</h2>
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <p>
-              Constraint geometry provides a mathematical framework for understanding and
-              implementing AI governance. It allows us to model complex ethical boundaries,
-              regulatory requirements, and operational constraints as geometric structures.
-            </p>
-            <p>
-              This approach enables us to:
-            </p>
-            <ul>
-              <li>Visualize and reason about multi-dimensional governance requirements</li>
-              <li>Identify conflicts and trade-offs between different constraints</li>
-              <li>Design AI systems that provably operate within defined boundaries</li>
-              <li>Create auditable and explainable governance mechanisms</li>
-            </ul>
+        {/* Mission Section */}
+        <Section>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionNameBox name="Our Mission" />
+            <InViewFade>
+              <div className="max-w-4xl mx-auto space-y-8">
+                <h2 className="text-4xl md:text-5xl font-bold text-foreground text-center">What We're About</h2>
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-xl text-foreground leading-relaxed">
+                    Beyond the resume is a blog dedicated to exploring fair, transparent AI in recruitment and retention. We believe that AI systems used for high-stakes decisions like hiring must be explainable, verifiable, and trustworthy.
+                  </p>
+                  <p className="text-xl text-foreground leading-relaxed">
+                    This isn't about selling a product or service. It's about sharing insights, technical approaches, and honest reflections on building AI that respects both candidates and organizations.
+                  </p>
+                  <p className="text-xl text-foreground leading-relaxed">
+                    We write about the challenges, the trade-offs, and the practical realities of applying AI to talent management—from candidate screening to retention prediction to bias mitigation.
+                  </p>
+                </div>
+              </div>
+            </InViewFade>
           </div>
-        </section>
+        </Section>
 
-        {/* Our Recruitment Work */}
-        <section className="space-y-4">
-          <h2 className="text-3xl font-bold">Our Recruitment Startup</h2>
-          <div className="prose prose-lg dark:prose-invert max-w-none">
-            <p>
-              Our recruitment platform applies these governance principles to create a hiring
-              ecosystem that's fair, efficient, and transparent. We're building tools that help
-              organizations find the right talent while ensuring that AI-assisted decisions remain
-              accountable and bias-free.
-            </p>
-            <p>
-              Key areas of focus include:
-            </p>
-            <ul>
-              <li>Bias detection and mitigation in candidate screening</li>
-              <li>Transparent AI-assisted matching algorithms</li>
-              <li>Privacy-preserving candidate evaluation</li>
-              <li>Explainable hiring recommendations</li>
-            </ul>
+        {/* Topics Section */}
+        <Section>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionNameBox name="Topics" />
+            <InViewFade>
+              <div className="max-w-4xl mx-auto space-y-8">
+                <h2 className="text-4xl md:text-5xl font-bold text-foreground text-center">What We Write About</h2>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <InViewFade delay={100}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6 hover:border-seafoam transition-colors">
+                      <h3 className="text-foreground font-bold text-xl mb-3">Recruitment AI</h3>
+                      <p className="text-foreground leading-relaxed">
+                        Context-aware candidate screening, transparent decision-making, and building systems that surface exceptional talent without bias.
+                      </p>
+                    </div>
+                  </InViewFade>
+                  <InViewFade delay={200}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6 hover:border-seafoam transition-colors">
+                      <h3 className="text-foreground font-bold text-xl mb-3">Retention & Attrition</h3>
+                      <p className="text-foreground leading-relaxed">
+                        Early warning signals, privacy-first analytics, and understanding why people stay or leave—without invasive surveillance.
+                      </p>
+                    </div>
+                  </InViewFade>
+                  <InViewFade delay={300}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6 hover:border-seafoam transition-colors">
+                      <h3 className="text-foreground font-bold text-xl mb-3">AI Ethics & Transparency</h3>
+                      <p className="text-foreground leading-relaxed">
+                        Building explainable AI, verifiable claims, auditable decisions, and systems that humans can understand and trust.
+                      </p>
+                    </div>
+                  </InViewFade>
+                  <InViewFade delay={400}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6 hover:border-seafoam transition-colors">
+                      <h3 className="text-foreground font-bold text-xl mb-3">Technical Deep Dives</h3>
+                      <p className="text-foreground leading-relaxed">
+                        Architecture patterns, implementation details, and lessons learned from building production AI systems for talent management.
+                      </p>
+                    </div>
+                  </InViewFade>
+                </div>
+              </div>
+            </InViewFade>
           </div>
-        </section>
+        </Section>
 
-        {/* Contact */}
-        <section className="space-y-4 pt-8 border-t border-border">
-          <h2 className="text-2xl font-bold">Get in Touch</h2>
-          <p className="text-muted-foreground">
-            Interested in our research or recruitment solutions? We'd love to hear from you.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Button variant="outline" size="sm" asChild>
-              <a href={`mailto:${PUBLIC_CONTACT.email}`}>
-                <Mail className="mr-2 h-4 w-4" />
-                Email Us
-              </a>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a
-                href={PUBLIC_CONTACT.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Linkedin className="mr-2 h-4 w-4" />
-                LinkedIn
-              </a>
-            </Button>
-            <Button variant="outline" size="sm" asChild>
-              <a
-                href={PUBLIC_CONTACT.github}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </a>
-            </Button>
+        {/* Core Principles Section */}
+        <Section>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <SectionNameBox name="Principles" />
+            <InViewFade>
+              <div className="max-w-4xl mx-auto space-y-8">
+                <h2 className="text-4xl md:text-5xl font-bold text-foreground text-center">Core Principles</h2>
+                <div className="space-y-6">
+                  <InViewFade delay={100}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6">
+                      <h3 className="text-foreground font-bold text-lg mb-2">Transparency First</h3>
+                      <p className="text-foreground leading-relaxed">
+                        AI decisions that affect people's careers must be explainable. No black boxes, no "trust the algorithm."
+                      </p>
+                    </div>
+                  </InViewFade>
+                  <InViewFade delay={200}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6">
+                      <h3 className="text-foreground font-bold text-lg mb-2">Privacy by Design</h3>
+                      <p className="text-foreground leading-relaxed">
+                        Effective AI doesn't require invasive surveillance. We explore privacy-preserving approaches that respect individuals.
+                      </p>
+                    </div>
+                  </InViewFade>
+                  <InViewFade delay={300}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6">
+                      <h3 className="text-foreground font-bold text-lg mb-2">Verifiable Claims</h3>
+                      <p className="text-foreground leading-relaxed">
+                        Every AI system makes claims about its capabilities. Those claims should be testable, auditable, and provable.
+                      </p>
+                    </div>
+                  </InViewFade>
+                  <InViewFade delay={400}>
+                    <div className="bg-card border border-seafoam/30 rounded-lg p-6">
+                      <h3 className="text-foreground font-bold text-lg mb-2">Human-Centered</h3>
+                      <p className="text-foreground leading-relaxed">
+                        AI should augment human judgment, not replace it. The goal is better decisions, not automated ones.
+                      </p>
+                    </div>
+                  </InViewFade>
+                </div>
+              </div>
+            </InViewFade>
           </div>
-        </section>
+        </Section>
+
+        {/* CTA Section */}
+        <Section>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <InViewFade>
+              <div className="max-w-3xl mx-auto text-center space-y-8">
+                <h2 className="text-4xl md:text-5xl font-bold text-foreground">
+                  Start Reading
+                </h2>
+                <p className="text-xl text-foreground leading-relaxed">
+                  Explore our articles on fair hiring, AI transparency, and building better systems
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Link to="/articles">
+                    <Button size="lg" className="interactive-element bg-seafoam hover:bg-seafoam/90 text-white">
+                      Browse Articles
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                  <Link to="/newsletter">
+                    <Button size="lg" variant="outline" className="interactive-element border-seafoam text-foreground hover:bg-seafoam/10">
+                      Subscribe to Newsletter
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </InViewFade>
+          </div>
+        </Section>
       </div>
-    </div>
+    </PageFadeIn>
   );
 }

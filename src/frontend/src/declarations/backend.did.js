@@ -8,32 +8,81 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
 });
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const ArticleUpdate = IDL.Record({
   'title' : IDL.Text,
-  'content' : IDL.Text,
   'tags' : IDL.Vec(IDL.Text),
   'author' : IDL.Opt(IDL.Text),
+  'textContent' : IDL.Text,
 });
 export const Article = IDL.Record({
   'id' : IDL.Nat,
+  'pdf' : IDL.Opt(ExternalBlob),
   'title' : IDL.Text,
-  'content' : IDL.Text,
   'published' : IDL.Bool,
   'slug' : IDL.Text,
   'tags' : IDL.Vec(IDL.Text),
   'author' : IDL.Opt(IDL.Text),
   'timestamp' : IDL.Int,
+  'textAttachment' : IDL.Opt(ExternalBlob),
+  'textContent' : IDL.Text,
 });
 export const UserProfile = IDL.Record({ 'name' : IDL.Text });
+export const RestEndpointConfig = IDL.Record({
+  'id' : IDL.Text,
+  'enabled' : IDL.Bool,
+  'endpointUrl' : IDL.Text,
+  'apiKey' : IDL.Opt(IDL.Text),
+});
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'attachPdfToArticle' : IDL.Func([IDL.Nat, ExternalBlob], [], []),
+  'attachTextFileToArticle' : IDL.Func([IDL.Nat, ExternalBlob], [], []),
+  'clearRestEndpointConfig' : IDL.Func([], [], []),
   'createArticle' : IDL.Func([IDL.Text, ArticleUpdate], [], []),
   'deleteArticle' : IDL.Func([IDL.Nat], [], []),
   'getAllSlugsAdmin' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
@@ -46,6 +95,16 @@ export const idlService = IDL.Service({
       [IDL.Opt(Article)],
       ['query'],
     ),
+  'getRestEndpointStatus' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'status' : IDL.Text,
+          'configs' : IDL.Opt(RestEndpointConfig),
+        }),
+      ],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -55,40 +114,92 @@ export const idlService = IDL.Service({
   'listAllArticlesAdmin' : IDL.Func([], [IDL.Vec(Article)], ['query']),
   'listPublishedArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
   'publishArticle' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
+  'removePdfFromArticle' : IDL.Func([IDL.Nat], [], []),
+  'removeTextFileFromArticle' : IDL.Func([IDL.Nat], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'searchArticlesByTag' : IDL.Func([IDL.Text], [IDL.Vec(Article)], ['query']),
+  'setRestEndpointConfig' : IDL.Func([RestEndpointConfig], [], []),
   'updateArticle' : IDL.Func([IDL.Nat, ArticleUpdate], [], []),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
   });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const ArticleUpdate = IDL.Record({
     'title' : IDL.Text,
-    'content' : IDL.Text,
     'tags' : IDL.Vec(IDL.Text),
     'author' : IDL.Opt(IDL.Text),
+    'textContent' : IDL.Text,
   });
   const Article = IDL.Record({
     'id' : IDL.Nat,
+    'pdf' : IDL.Opt(ExternalBlob),
     'title' : IDL.Text,
-    'content' : IDL.Text,
     'published' : IDL.Bool,
     'slug' : IDL.Text,
     'tags' : IDL.Vec(IDL.Text),
     'author' : IDL.Opt(IDL.Text),
     'timestamp' : IDL.Int,
+    'textAttachment' : IDL.Opt(ExternalBlob),
+    'textContent' : IDL.Text,
   });
   const UserProfile = IDL.Record({ 'name' : IDL.Text });
+  const RestEndpointConfig = IDL.Record({
+    'id' : IDL.Text,
+    'enabled' : IDL.Bool,
+    'endpointUrl' : IDL.Text,
+    'apiKey' : IDL.Opt(IDL.Text),
+  });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'attachPdfToArticle' : IDL.Func([IDL.Nat, ExternalBlob], [], []),
+    'attachTextFileToArticle' : IDL.Func([IDL.Nat, ExternalBlob], [], []),
+    'clearRestEndpointConfig' : IDL.Func([], [], []),
     'createArticle' : IDL.Func([IDL.Text, ArticleUpdate], [], []),
     'deleteArticle' : IDL.Func([IDL.Nat], [], []),
     'getAllSlugsAdmin' : IDL.Func([], [IDL.Vec(IDL.Text)], ['query']),
@@ -101,6 +212,16 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(Article)],
         ['query'],
       ),
+    'getRestEndpointStatus' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'status' : IDL.Text,
+            'configs' : IDL.Opt(RestEndpointConfig),
+          }),
+        ],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
@@ -110,8 +231,11 @@ export const idlFactory = ({ IDL }) => {
     'listAllArticlesAdmin' : IDL.Func([], [IDL.Vec(Article)], ['query']),
     'listPublishedArticles' : IDL.Func([], [IDL.Vec(Article)], ['query']),
     'publishArticle' : IDL.Func([IDL.Nat, IDL.Bool], [], []),
+    'removePdfFromArticle' : IDL.Func([IDL.Nat], [], []),
+    'removeTextFileFromArticle' : IDL.Func([IDL.Nat], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'searchArticlesByTag' : IDL.Func([IDL.Text], [IDL.Vec(Article)], ['query']),
+    'setRestEndpointConfig' : IDL.Func([RestEndpointConfig], [], []),
     'updateArticle' : IDL.Func([IDL.Nat, ArticleUpdate], [], []),
   });
 };

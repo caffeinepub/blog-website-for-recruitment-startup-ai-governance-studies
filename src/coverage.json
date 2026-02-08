@@ -1,83 +1,34 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-07T12:15:25.747Z",
+  "generatedAt": "2026-02-08T09:13:18.179Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 3,
+    "total": 1,
+    "implemented": 1,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Fix the public Articles index page so it reliably loads without throwing an error, and show a user-friendly error state that includes actionable details (while keeping the page layout intact).",
+        "summary": "Update the animated background canvas so it renders with a fully transparent background (no black fill), allowing the app’s white background to show through while keeping only the neon nodes/lines visible.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/ArticlesIndexPage.tsx"
+          "frontend/src/components/layout/ProfilesSkillsJobsGraphBackground.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/pages/ArticlesIndexPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-2",
-        "summary": "Fix the Articles data flow so published articles returned from the canister are correctly parsed and rendered in the Articles list and article cards (IDs, timestamps, tags, and slugs).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/articles/ArticlesList.tsx",
-          "frontend/src/pages/ArticlesIndexPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/hooks/useQueries.ts",
-          "frontend/src/components/articles/ArticlesList.tsx",
-          "frontend/src/pages/ArticlesIndexPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Provide an admin-visible way in the UI to (re)publish the built-in article templates into the canister, so the public Articles page can display real published articles after a fresh deployment.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "frontend/src/hooks/useQueries.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/pages/admin/AdminDashboardPage.tsx",
-          "frontend/src/hooks/useQueries.ts"
+          "frontend/src/components/layout/ProfilesSkillsJobsGraphBackground.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/articles/ArticlesList.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/pages/ArticlesIndexPage.tsx",
-    "frontend/src/pages/admin/AdminDashboardPage.tsx",
+    "frontend/src/components/layout/ProfilesSkillsJobsGraphBackground.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-fix-the-public-articles-index-page-so-it-reliably-loads-without-throwing-an-error-and-show-a-user-friendly-error-state-that-includes-actionable-details-while-keeping-the-page-layout-intact",
-      "featureTitle": "Fix the public Articles index page so it reliably loads without throwing an error, and show a user-friendly error state that includes actionable details (while keeping the page layout intact).",
+      "featureId": "feature-update-the-animated-background-canvas-so-it-renders-with-a-fully-transparent-background-no-black-fill-allowing-the-app-s-white-background-to-show-through-while-keeping-only-the-neon-nodes-lines-visible",
+      "featureTitle": "Update the animated background canvas so it renders with a fully transparent background (no black fill), allowing the app’s white background to show through while keeping only the neon nodes/lines visible.",
       "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/ArticlesIndexPage.tsx"
+        "frontend/src/components/layout/ProfilesSkillsJobsGraphBackground.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -14,51 +13,11 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
         "REQ-1"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-the-articles-data-flow-so-published-articles-returned-from-the-canister-are-correctly-parsed-and-rendered-in-the-articles-list-and-article-cards-ids-timestamps-tags-and-slugs",
-      "featureTitle": "Fix the Articles data flow so published articles returned from the canister are correctly parsed and rendered in the Articles list and article cards (IDs, timestamps, tags, and slugs).",
-      "files": [
-        "frontend/src/components/articles/ArticlesList.tsx",
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/ArticlesIndexPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-provide-an-admin-visible-way-in-the-ui-to-re-publish-the-built-in-article-templates-into-the-canister-so-the-public-articles-page-can-display-real-published-articles-after-a-fresh-deployment",
-      "featureTitle": "Provide an admin-visible way in the UI to (re)publish the built-in article templates into the canister, so the public Articles page can display real published articles after a fresh deployment.",
-      "files": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/pages/admin/AdminDashboardPage.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
       ],
       "confidence": "high"
     }

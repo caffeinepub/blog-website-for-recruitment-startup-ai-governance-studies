@@ -1,16 +1,20 @@
+// No backend/Motoko changes needed. The fix needed is 100% type-script (frontend) only.
+// No backend access pattern changes are necessary in Motoko.
 import Map "mo:core/Map";
-import Time "mo:core/Time";
-import Text "mo:core/Text";
-import Order "mo:core/Order";
-import Runtime "mo:core/Runtime";
-import Principal "mo:core/Principal";
 import Iter "mo:core/Iter";
+import Time "mo:core/Time";
+import Principal "mo:core/Principal";
+import Order "mo:core/Order";
+import Text "mo:core/Text";
+import Runtime "mo:core/Runtime";
 import AccessControl "authorization/access-control";
+import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
+import MixinStorage "blob-storage/Mixin";
 
-(with migration = Migration.run)
 actor {
+  include MixinStorage();
+
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -18,20 +22,29 @@ actor {
     name : Text;
   };
 
-  type Article = {
+  public type RestEndpointConfig = {
+    id : Text;
+    endpointUrl : Text;
+    apiKey : ?Text;
+    enabled : Bool;
+  };
+
+  public type Article = {
     id : Nat;
     slug : Text;
     title : Text;
-    content : Text;
+    textContent : Text;
     author : ?Text;
     tags : [Text];
     published : Bool;
     timestamp : Int;
+    pdf : ?Storage.ExternalBlob;
+    textAttachment : ?Storage.ExternalBlob;
   };
 
-  type ArticleUpdate = {
+  public type ArticleUpdate = {
     title : Text;
-    content : Text;
+    textContent : Text;
     author : ?Text;
     tags : [Text];
   };
@@ -45,6 +58,7 @@ actor {
   let articles = Map.empty<Nat, Article>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   var nextArticleId = 1;
+  var restEndpointConfig : ?RestEndpointConfig = null;
 
   func getNextArticleId() : Nat {
     let id = nextArticleId;
@@ -72,6 +86,44 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
     userProfiles.add(caller, profile);
+  };
+
+  // --- REST Endpoint Integrator Management ---
+  public shared ({ caller }) func setRestEndpointConfig(config : RestEndpointConfig) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Access denied. Admin role required!");
+    };
+    restEndpointConfig := ?config;
+  };
+
+  public shared ({ caller }) func clearRestEndpointConfig() : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Access denied. Admin role required!");
+    };
+    restEndpointConfig := null;
+  };
+
+  public query ({ caller }) func getRestEndpointStatus() : async {
+    configs : ?RestEndpointConfig;
+    status : Text;
+  } {
+    if (not AccessControl.hasPermission(accessControlState, caller, #user)) {
+      Runtime.trap("Unauthorized: Only authenticated users can view endpoint configuration");
+    };
+    switch (restEndpointConfig) {
+      case (null) {
+        {
+          configs = null;
+          status = "No Articles REST endpoint configured";
+        };
+      };
+      case (?config) {
+        {
+          configs = ?config;
+          status = "Articles REST endpoint configured";
+        };
+      };
+    };
   };
 
   // --- Public Queries without authentication (Guest access allowed) ---
@@ -153,11 +205,13 @@ actor {
       id;
       slug;
       title = update.title;
-      content = update.content;
+      textContent = update.textContent;
       author = update.author;
       tags = update.tags;
       published = false;
       timestamp = Time.now();
+      pdf = null;
+      textAttachment = null;
     };
     articles.add(id, article);
   };
@@ -176,11 +230,13 @@ actor {
       id = existing.id;
       slug = existing.slug;
       title = update.title;
-      content = update.content;
+      textContent = update.textContent;
       author = update.author;
       tags = update.tags;
       published = existing.published;
       timestamp = Time.now();
+      pdf = existing.pdf;
+      textAttachment = existing.textAttachment;
     };
     articles.add(id, updatedArticle);
   };
@@ -199,11 +255,13 @@ actor {
       id = existing.id;
       slug = existing.slug;
       title = existing.title;
-      content = existing.content;
+      textContent = existing.textContent;
       author = existing.author;
       tags = existing.tags;
       published;
       timestamp = existing.timestamp;
+      pdf = existing.pdf;
+      textAttachment = existing.textAttachment;
     };
     articles.add(id, updatedArticle);
   };
@@ -216,5 +274,109 @@ actor {
       Runtime.trap("Article not found");
     };
     articles.remove(id);
+  };
+
+  // Attach PDF to article (admin-only)
+  public shared ({ caller }) func attachPdfToArticle(id : Nat, blob : Storage.ExternalBlob) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Access denied. Admin role required!");
+    };
+
+    let existing = switch (articles.get(id)) {
+      case (null) { Runtime.trap("Article not found") };
+      case (?a) { a };
+    };
+
+    let updatedArticle : Article = {
+      id = existing.id;
+      slug = existing.slug;
+      title = existing.title;
+      textContent = existing.textContent;
+      author = existing.author;
+      tags = existing.tags;
+      published = existing.published;
+      timestamp = existing.timestamp;
+      pdf = ?blob;
+      textAttachment = existing.textAttachment;
+    };
+    articles.add(id, updatedArticle);
+  };
+
+  // Attach text file to article (admin-only)
+  public shared ({ caller }) func attachTextFileToArticle(id : Nat, blob : Storage.ExternalBlob) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Access denied. Admin role required!");
+    };
+
+    let existing = switch (articles.get(id)) {
+      case (null) { Runtime.trap("Article not found") };
+      case (?a) { a };
+    };
+
+    let updatedArticle : Article = {
+      id = existing.id;
+      slug = existing.slug;
+      title = existing.title;
+      textContent = existing.textContent;
+      author = existing.author;
+      tags = existing.tags;
+      published = existing.published;
+      timestamp = existing.timestamp;
+      pdf = existing.pdf;
+      textAttachment = ?blob;
+    };
+    articles.add(id, updatedArticle);
+  };
+
+  // Remove PDF from article (admin-only)
+  public shared ({ caller }) func removePdfFromArticle(id : Nat) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Access denied. Admin role required!");
+    };
+
+    let existing = switch (articles.get(id)) {
+      case (null) { Runtime.trap("Article not found") };
+      case (?a) { a };
+    };
+
+    let updatedArticle : Article = {
+      id = existing.id;
+      slug = existing.slug;
+      title = existing.title;
+      textContent = existing.textContent;
+      author = existing.author;
+      tags = existing.tags;
+      published = existing.published;
+      timestamp = existing.timestamp;
+      pdf = null;
+      textAttachment = existing.textAttachment;
+    };
+    articles.add(id, updatedArticle);
+  };
+
+  // Remove text file from article (admin-only)
+  public shared ({ caller }) func removeTextFileFromArticle(id : Nat) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Access denied. Admin role required!");
+    };
+
+    let existing = switch (articles.get(id)) {
+      case (null) { Runtime.trap("Article not found") };
+      case (?a) { a };
+    };
+
+    let updatedArticle : Article = {
+      id = existing.id;
+      slug = existing.slug;
+      title = existing.title;
+      textContent = existing.textContent;
+      author = existing.author;
+      tags = existing.tags;
+      published = existing.published;
+      timestamp = existing.timestamp;
+      pdf = existing.pdf;
+      textAttachment = null;
+    };
+    articles.add(id, updatedArticle);
   };
 };

@@ -1,36 +1,20 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "Project includes an Articles page/feature that is currently failing (page load error) and has never displayed generated/stored articles; user requested to proceed with fixing it.",
+  "summary": "Project to update canvas rendering so the canvas background is fully transparent, allowing the app's white background to show through.",
   "architectural_notes": [
-    "Articles feature should persist generated articles to the system’s storage/back end and the Articles page should fetch and render them on load (with proper error handling)."
+    "Canvas renderer should not paint a default background fill; preserve transparency so parent/app background shows through."
   ],
   "known_issues": [
-    "Articles page does not load (shows an error) and has never displayed any articles despite articles being generated previously."
+    "Canvas currently renders with a black background fill; needs to be transparent per user selection."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-fix-the-public-articles-index-page-so-it-reliably-loads-without-throwing-an-error-and-show-a-user-friendly-error-state-that-includes-actionable-details-while-keeping-the-page-layout-intact",
-      "title": "Fix the public Articles index page so it reliably loads without throwing an error, and show a user-friendly error state that includes actionable details (while keeping the page layout intact).",
+      "id": "feature-update-the-animated-background-canvas-so-it-renders-with-a-fully-transparent-background-no-black-fill-allowing-the-app-s-white-background-to-show-through-while-keeping-only-the-neon-nodes-lines-visible",
+      "title": "Update the animated background canvas so it renders with a fully transparent background (no black fill), allowing the app’s white background to show through while keeping only the neon nodes/lines visible.",
       "reqIds": [
         "REQ-1"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-the-articles-data-flow-so-published-articles-returned-from-the-canister-are-correctly-parsed-and-rendered-in-the-articles-list-and-article-cards-ids-timestamps-tags-and-slugs",
-      "title": "Fix the Articles data flow so published articles returned from the canister are correctly parsed and rendered in the Articles list and article cards (IDs, timestamps, tags, and slugs).",
-      "reqIds": [
-        "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-provide-an-admin-visible-way-in-the-ui-to-re-publish-the-built-in-article-templates-into-the-canister-so-the-public-articles-page-can-display-real-published-articles-after-a-fresh-deployment",
-      "title": "Provide an admin-visible way in the UI to (re)publish the built-in article templates into the canister, so the public Articles page can display real published articles after a fresh deployment.",
-      "reqIds": [
-        "REQ-5"
       ],
       "version": 1
     }
@@ -38,28 +22,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Fix Articles page: resolve load error and ensure generated articles are persisted and displayed correctly",
+      "summary": "Make canvas background fully transparent (remove default black fill) so only neon nodes/lines render over the app background.",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
+      "status": "in_progress"
     }
   ],
-  "projectName": "Fix Articles page load error and persist/display generated articles",
+  "projectName": "Make animated graph canvas background fully transparent",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

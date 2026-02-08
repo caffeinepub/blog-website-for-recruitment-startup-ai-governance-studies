@@ -1,116 +1,50 @@
 {
   "kind": "build_request",
-  "title": "Fix Articles page load error and persist/display generated articles",
+  "title": "Make animated graph canvas background fully transparent",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Fix the public Articles index page so it reliably loads without throwing an error, and show a user-friendly error state that includes actionable details (while keeping the page layout intact).",
+      "text": "Update the animated background canvas so it renders with a fully transparent background (no black fill), allowing the app’s white background to show through while keeping only the neon nodes/lines visible.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "user-articles-issue-1",
-          "user-articles-issue-2"
+          "msg-6",
+          "msg-7"
         ],
         "quotes": [
-          "issue with articles page",
-          "the page is not loading and is showing error"
+          "transparent canvas",
+          "start build"
         ]
       },
       "acceptanceCriteria": [
-        "Navigating to the Articles index route renders either a list, an empty state, or a readable error state (no uncaught exceptions).",
-        "If the backend call fails, the UI shows the error message text and does not get stuck in a loading state.",
-        "The page works for both anonymous users and logged-in users."
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "text": "Fix the Articles data flow so published articles returned from the canister are correctly parsed and rendered in the Articles list and article cards (IDs, timestamps, tags, and slugs).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "user-articles-issue-3"
-        ],
-        "quotes": [
-          "article page always has isues and it never showed any real articles even thugh the system generated articles"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When the backend returns one or more published articles, the Articles index page renders them as cards with title, excerpt, tags, and date.",
-        "Clicking an article card navigates to the corresponding article detail route using the article.slug.",
-        "No runtime type errors occur when reading article fields (e.g., BigInt/Nat IDs, timestamps)."
-      ]
-    },
-    {
-      "id": "REQ-3",
-      "text": "Persist articles and user profiles across canister upgrades/redeploys by storing articles, userProfiles, and nextArticleId in stable state and restoring them on upgrade (single-actor compatible).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "user-articles-issue-3",
-          "user-articles-issue-4"
-        ],
-        "quotes": [
-          "article page always has isues and it never showed any real articles even thugh the system generated articles",
-          "you generated the articles in previous ession and said you will post but never happened. and no article page never displayed any article"
-        ]
-      },
-      "acceptanceCriteria": [
-        "After creating and publishing at least one article, upgrading/redeploying the canister preserves published articles (they still appear via listPublishedArticles).",
-        "Admin listAllArticlesAdmin continues to show all stored articles after upgrade.",
-        "User profiles saved via saveCallerUserProfile persist after upgrade."
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "text": "Ensure backend public article query methods used by the public site (listPublishedArticles, getPublicArticleBySlug, searchArticlesByTag) do not trap for anonymous callers and return deterministic, consistently ordered results.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "user-articles-issue-1",
-          "user-articles-issue-2"
-        ],
-        "quotes": [
-          "issue with articles page",
-          "the page is not loading and is showing error"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Calling listPublishedArticles as an anonymous principal returns a list (possibly empty) and never traps due to authorization checks.",
-        "If multiple published articles exist, listPublishedArticles returns them in a consistent order (newest first) across calls.",
-        "Calling getPublicArticleBySlug for an unpublished or missing slug returns null (or a non-trapping not-found outcome consistent with the existing API contract used by the frontend)."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Provide an admin-visible way in the UI to (re)publish the built-in article templates into the canister, so the public Articles page can display real published articles after a fresh deployment.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "user-articles-issue-4"
-        ],
-        "quotes": [
-          "you generated the articles in previous ession and said you will post but never happened."
-        ]
-      },
-      "acceptanceCriteria": [
-        "From the existing admin area, an admin can trigger publishing/recreating the default article templates into the backend without manual canister calls.",
-        "After running the action successfully, the public Articles page shows the newly published template articles without needing a hard refresh (React Query cache invalidation works)."
+        "On all routes, the area behind the animated graph shows the app background color (white) rather than black.",
+        "The canvas element has no CSS background color applied (computed background is transparent).",
+        "The render loop does not paint an opaque background (no black or other solid fill per frame); only the graph edges/nodes are drawn.",
+        "No visual ‘black flash’ appears on initial load or on resize before the first animation frame completes."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
-    "Do not edit files under frontend/src/components/ui or any frontend immutablePaths (compose instead of modifying read-only sources).",
-    "Use English for any user-facing text."
+    "Do not edit files under frontend/src/components/ui (compose them instead).",
+    "Do not modify any paths listed as immutable in SYSTEM_CONTEXT."
   ],
   "nonGoals": [
-    "Adding third-party authentication providers (only Internet Identity is supported).",
-    "Adding external databases or non-Internet Computer storage services.",
-    "Building new article generation via an LLM or external API integration."
+    "Do not change the graph’s node/edge colors, shapes, or animation behavior beyond what is necessary to make the canvas background transparent.",
+    "No backend changes or migrations."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

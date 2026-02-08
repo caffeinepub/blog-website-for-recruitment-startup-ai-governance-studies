@@ -20,264 +20,260 @@ import type { ArticleUpdate } from '../../backend';
 import SlugField from '../../components/admin/SlugField';
 import TagEditor from '../../components/admin/TagEditor';
 import MarkdownRenderer from '../../components/content/MarkdownRenderer';
-import { articleTemplates } from '../../content/articleTemplates';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { maskSubstrateNames } from '@/utils/layerMask';
+import ArticleAttachmentsEditor from '../../components/admin/ArticleAttachmentsEditor';
 
 export default function ArticleEditorPage() {
   const navigate = useNavigate();
-  const params = useParams({ strict: false });
-  const articleId = params.id || null;
-  const isEditMode = articleId !== null;
+  const { id } = useParams({ strict: false });
+  const isEditMode = !!id;
 
-  const { data: article, isLoading: articleLoading } = useGetArticleById(articleId);
-  const { data: existingSlugs = [] } = useGetAllSlugsAdmin();
-  const createArticle = useCreateArticle();
-  const updateArticle = useUpdateArticle();
-  const publishArticle = usePublishArticle();
+  const { data: article, isLoading: articleLoading } = useGetArticleById(id || null);
+  const { data: existingSlugs = [], isLoading: slugsLoading } = useGetAllSlugsAdmin();
+  const createMutation = useCreateArticle();
+  const updateMutation = useUpdateArticle();
+  const publishMutation = usePublishArticle();
 
-  const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState('');
+  const [textContent, setTextContent] = useState('');
   const [author, setAuthor] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [published, setPublished] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [isSlugValid, setIsSlugValid] = useState(false);
 
-  // Load article data in edit mode
   useEffect(() => {
-    if (article) {
-      setTitle(article.title);
-      setSlug(article.slug);
-      setContent(article.content);
-      setAuthor(article.author || '');
-      setTags(article.tags);
-      setPublished(article.published);
+    if (article && isEditMode) {
+      setSlug(String(article.slug || ''));
+      setTitle(String(article.title || ''));
+      setTextContent(String(article.textContent || ''));
+      setAuthor(String(article.author || ''));
+      setTags(Array.isArray(article.tags) ? article.tags.map(String) : []);
+      setPublished(Boolean(article.published));
     }
-  }, [article]);
-
-  // Load template when selected
-  const handleTemplateSelect = (templateSlug: string) => {
-    if (!templateSlug) return;
-    
-    const template = articleTemplates.find(t => t.slug === templateSlug);
-    if (template) {
-      setTitle(template.title);
-      setSlug(template.slug);
-      setContent(template.content);
-      setAuthor(template.author || '');
-      setTags(template.tags);
-      setSelectedTemplate(templateSlug);
-      toast.success(`Template "${maskSubstrateNames(template.title)}" loaded`);
-    }
-  };
+  }, [article, isEditMode]);
 
   const handleSave = async () => {
-    if (!title.trim() || !slug.trim() || !content.trim()) {
-      toast.error('Please fill in all required fields');
+    if (!title.trim()) {
+      toast.error('Title is required');
       return;
     }
 
-    const articleUpdate: ArticleUpdate = {
+    if (!isEditMode && !slug.trim()) {
+      toast.error('Slug is required');
+      return;
+    }
+
+    if (!isEditMode && !isSlugValid) {
+      toast.error('Please fix slug validation errors');
+      return;
+    }
+
+    const update: ArticleUpdate = {
       title: title.trim(),
-      content: content.trim(),
+      textContent: textContent.trim(),
       author: author.trim() || undefined,
       tags,
     };
 
     try {
       if (isEditMode && article) {
-        await updateArticle.mutateAsync({ id: article.id, update: articleUpdate });
+        await updateMutation.mutateAsync({ id: article.id, update });
         toast.success('Article updated successfully');
       } else {
-        const result = await createArticle.mutateAsync({ slug: slug.trim(), update: articleUpdate });
+        const newArticle = await createMutation.mutateAsync({ slug: slug.trim(), update });
         toast.success('Article created successfully');
-        navigate({ to: '/admin/articles/$id', params: { id: result.id.toString() } });
+        navigate({ to: `/admin/articles/${newArticle.id}` });
       }
     } catch (error: any) {
-      console.error('Error saving article:', error);
-      toast.error(error.message || 'Failed to save article');
+      const errorMessage = error?.message || 'An error occurred';
+      if (errorMessage.includes('Duplicate slug')) {
+        toast.error('This slug is already in use. Please choose a different one.');
+      } else {
+        toast.error(`Failed to save article: ${errorMessage}`);
+      }
     }
   };
 
-  const handlePublish = async () => {
+  const handlePublishToggle = async () => {
     if (!article) return;
 
     try {
-      await publishArticle.mutateAsync({ id: article.id, published: !published });
+      await publishMutation.mutateAsync({ id: article.id, published: !published });
       setPublished(!published);
       toast.success(published ? 'Article unpublished' : 'Article published');
     } catch (error: any) {
-      console.error('Error publishing article:', error);
-      toast.error(error.message || 'Failed to update publish status');
+      toast.error(`Failed to ${published ? 'unpublish' : 'publish'} article: ${error?.message || 'Unknown error'}`);
     }
   };
 
-  if (articleLoading) {
+  const isSaving = createMutation.isPending || updateMutation.isPending;
+  const isPublishing = publishMutation.isPending;
+  const isLoading = articleLoading || slugsLoading;
+
+  if (isLoading) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex items-center justify-center min-h-[40vh]">
-          <div className="text-center space-y-4">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading article...</p>
-          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       </div>
     );
   }
 
+  const canSave = isEditMode ? true : (title.trim() && slug.trim() && isSlugValid);
+
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="max-w-6xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate({ to: '/admin' })}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
-            </Button>
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight">
-                {isEditMode ? 'Edit Article' : 'New Article'}
-              </h1>
-              {isEditMode && article && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  Editing: {maskSubstrateNames(article.title)}
-                </p>
-              )}
-            </div>
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {isEditMode ? 'Edit Article' : 'Create New Article'}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {isEditMode ? 'Update article content and settings' : 'Write and publish a new article'}
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            {isEditMode && (
-              <div className="flex items-center gap-2">
-                <Label htmlFor="publish-toggle" className="text-sm">
-                  {published ? 'Published' : 'Draft'}
-                </Label>
-                <Switch
-                  id="publish-toggle"
-                  checked={published}
-                  onCheckedChange={handlePublish}
-                  disabled={publishArticle.isPending}
-                />
-              </div>
-            )}
-            <Button
-              onClick={handleSave}
-              disabled={createArticle.isPending || updateArticle.isPending}
-            >
-              {(createArticle.isPending || updateArticle.isPending) ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save
-                </>
-              )}
-            </Button>
-          </div>
+          <Button variant="ghost" onClick={() => navigate({ to: '/admin' })}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Admin
+          </Button>
         </div>
-
-        {/* Template Selector (only for new articles) */}
-        {!isEditMode && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Start from Template</CardTitle>
-              <CardDescription>
-                Choose a template to pre-fill the article fields
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a template..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {articleTemplates.map((template) => (
-                    <SelectItem key={template.slug} value={template.slug}>
-                      {maskSubstrateNames(template.title)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Editor Tabs */}
         <Tabs defaultValue="edit" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="edit">Edit</TabsTrigger>
             <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="attachments">Attachments</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="edit" className="space-y-6 mt-6">
-            <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter article title"
-              />
-            </div>
+          {/* Edit Tab */}
+          <TabsContent value="edit" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Article Details</CardTitle>
+                <CardDescription>Basic information about your article</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Slug Field */}
+                <SlugField
+                  value={slug}
+                  onChange={setSlug}
+                  existingSlugs={existingSlugs}
+                  currentSlug={isEditMode ? article?.slug : undefined}
+                  disabled={isEditMode}
+                  onValidationChange={setIsSlugValid}
+                />
 
-            <SlugField
-              value={slug}
-              onChange={setSlug}
-              existingSlugs={existingSlugs}
-              currentSlug={article?.slug}
-              disabled={isEditMode}
-            />
+                {/* Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="title">Title</Label>
+                  <Input
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Article title"
+                  />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="author">Author</Label>
-              <Input
-                id="author"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                placeholder="Enter author name (optional)"
-              />
-            </div>
+                {/* Author */}
+                <div className="space-y-2">
+                  <Label htmlFor="author">Author (optional)</Label>
+                  <Input
+                    id="author"
+                    value={author}
+                    onChange={(e) => setAuthor(e.target.value)}
+                    placeholder="Author name"
+                  />
+                </div>
 
-            <TagEditor tags={tags} onChange={setTags} />
+                {/* Tags */}
+                <div className="space-y-2">
+                  <Label>Tags</Label>
+                  <TagEditor tags={tags} onChange={setTags} />
+                </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="content">Content * (Markdown)</Label>
-              <Textarea
-                id="content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Write your article content in Markdown..."
-                className="min-h-[500px] font-mono"
-              />
+                {/* Content */}
+                <div className="space-y-2">
+                  <Label htmlFor="content">Content (Markdown)</Label>
+                  <Textarea
+                    id="content"
+                    value={textContent}
+                    onChange={(e) => setTextContent(e.target.value)}
+                    placeholder="Write your article content in Markdown..."
+                    className="min-h-[400px] font-mono text-sm"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                {isEditMode && (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="published"
+                      checked={published}
+                      onCheckedChange={handlePublishToggle}
+                      disabled={isPublishing}
+                    />
+                    <Label htmlFor="published" className="cursor-pointer">
+                      {published ? 'Published' : 'Draft'}
+                    </Label>
+                  </div>
+                )}
+              </div>
+              <Button onClick={handleSave} disabled={isSaving || !canSave}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    {isEditMode ? 'Update Article' : 'Create Article'}
+                  </>
+                )}
+              </Button>
             </div>
           </TabsContent>
 
-          <TabsContent value="preview" className="mt-6">
+          {/* Preview Tab */}
+          <TabsContent value="preview">
             <Card>
               <CardHeader>
-                <CardTitle>{maskSubstrateNames(title) || 'Untitled'}</CardTitle>
-                {author && (
-                  <CardDescription>By {maskSubstrateNames(author)}</CardDescription>
-                )}
+                <CardTitle>{title || 'Untitled Article'}</CardTitle>
+                {author && <CardDescription>By {author}</CardDescription>}
               </CardHeader>
               <CardContent>
-                <MarkdownRenderer content={content} />
+                <article className="prose prose-lg dark:prose-invert max-w-none">
+                  <MarkdownRenderer content={textContent} />
+                </article>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Attachments Tab */}
+          <TabsContent value="attachments">
+            {isEditMode && article ? (
+              <ArticleAttachmentsEditor articleId={article.id} article={article} />
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Attachments</CardTitle>
+                  <CardDescription>Save the article first to add attachments</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    You need to create the article before you can add PDF or text file attachments.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </div>
